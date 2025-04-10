@@ -11,7 +11,7 @@
 
     <div class="flex items-end gap-4">
       <p>版本：v1.0</p>
-      <p class="p-1 text-sm bg-slate-100 rounded-lg text-red-400">有新版本</p>
+      <p class="text-accent">有新版本</p>
     </div>
   </section>
 </template>

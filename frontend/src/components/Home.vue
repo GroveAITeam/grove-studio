@@ -4,8 +4,6 @@ import {reactive} from 'vue'
 import {Greet} from '../../wailsjs/go/main/App'
 
 const count = ref(0)
-const butClass = 'text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center active:scale-95';
-
 const data = reactive({
   name: "",
   resultText: "请输入你的名字: ",
@@ -27,7 +25,7 @@ const greet = () => {
   </div>
 
   <div class="space-y-4">
-    <div id="result" class="result">{{ data.resultText }}</div>
+    <div>{{ data.resultText }}</div>
     <div class="space-x-4">
       <input id="name" v-model="data.name" autocomplete="off" class="input" type="text"/>
       <button type="button" @click="greet" class="btn btn-secondary">欢迎</button>
