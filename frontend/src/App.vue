@@ -1,21 +1,60 @@
-<script lang="ts" setup>
-import HelloWorld from './components/HelloWorld.vue'</script>
+<script setup lang="ts">
+import { Icon } from '@iconify/vue';
+import DarkMode from './components/DarkMode.vue';
+import { useDark, useToggle } from "@vueuse/core";
+import { WindowMinimise, WindowMaximise, WindowUnmaximise, Quit } from "../wailsjs/runtime";
+import { ref } from 'vue';
+
+// 侧边栏导航
+const menu = [
+  { text: "首页", href: "/", icon: "material-symbols:home-app-logo" },
+  { text: "用户", href: "/users", icon: "material-symbols:supervisor-account-outline-rounded" },
+]
+// 侧边栏导航激活样式
+const activeClass = 'text-blue-600 dark:text-blue-400'
+// 是否非 Mac 平台
+const isNotMac = navigator.userAgent.toUpperCase().indexOf('MAC') < 0;
+// 是否最大化
+const isMaximised = ref(false);
+let isDark = useDark() // localStorage.getItem("theme") || "light"
+</script>
 
 <template>
-  <img id="logo" alt="Wails logo" src="./assets/images/logo-universal.png"/>
-  <HelloWorld/>
+  <main class="flex h-screen" :data-theme="isDark ? 'dark' : 'light'">
+    <nav
+        class="flex-none flex flex-col justify-between w-[70px] items-center text-center select-none z-20 bg-gray-50/10 dark:bg-slate-900/80"
+        style="--wails-draggable: drag"
+    >
+      <div class="mt-12 my-4 flex flex-col gap-6 text-2xl text-gray-500 dark:text-gray-200">
+        <router-link v-for="item in menu" :key="item.text" :to="item.href" v-slot="{isActive}">
+          <Icon :icon="item.icon" :class="isActive && activeClass" />
+        </router-link>
+      </div>
+      <div class="my-4 flex flex-col gap-4 text-2xl text-gray-500 dark:text-gray-200">
+        <DarkMode />
+        <router-link to="/setup" v-slot="{isActive}">
+          <Icon icon="material-symbols:menu-rounded" :class="isActive && activeClass" />
+        </router-link>
+      </div>
+    </nav>
+    <!-- 内容面板 -->
+    <div class="pl-2 w-full bg-white dark:bg-gray-900/90">
+      <!-- windows 定制化窗口按钮 -->
+      <div v-if="isNotMac" class="flex h-10 justify-end flex-0">
+        <button class="w-10 h-10 text-xl flex flex-col items-center justify-center hover:bg-[#E9E9E9] dark:hover:bg-[#2D2D2D] hover:text-gray-500" @click="WindowMinimise">
+          <Icon icon="mdi:window-minimize" />
+        </button>
+        <button class="w-10 h-10 text-xl flex flex-col items-center justify-center hover:bg-[#E9E9E9] dark:hover:bg-[#2D2D2D]" @click="isMaximised ? (WindowUnmaximise(),isMaximised = false) : (WindowMaximise(), isMaximised = true)">
+          <Icon icon="mdi:window-maximize" />
+        </button>
+        <button class="w-10 h-10 text-xl flex flex-col items-center justify-center hover:bg-[#C13124] dark:hover:bg-[#C13124] hover:text-white" @click="Quit">
+          <Icon icon="mdi:window-close" />
+        </button>
+      </div>
+      <div v-else class="h-8"></div>
+      <!-- 页面内容 -->
+      <router-view class="overflow-y-auto h-screen p-4" style="--wails-draggable:none;" />
+    </div>
+  </main>
 </template>
 
-<style>
-#logo {
-  display: block;
-  width: 50%;
-  height: 50%;
-  margin: auto;
-  padding: 10% 0 0;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  background-origin: content-box;
-}
-</style>
