@@ -1,5 +1,3 @@
-# README
-
 ## 安装依赖
 
 - golang
