@@ -4,6 +4,7 @@ import {useDark, useToggle} from "@vueuse/core";
 import { WindowMinimise, WindowMaximise, WindowUnmaximise, Quit } from "../wailsjs/runtime";
 import { ref } from 'vue';
 
+console.log('aa')
 const menu = [
   { text: "首页", href: "/", icon: "material-symbols:home-app-logo" },
   { text: "用户", href: "/users", icon: "material-symbols:supervisor-account-outline-rounded" },
@@ -13,6 +14,8 @@ const isNotMac = navigator.userAgent.toUpperCase().indexOf('MAC') < 0;
 const isMaximised = ref(false);
 let isDark = useDark()
 const toggleDark = useToggle(isDark);
+console.log(isNotMac)
+console.log(navigator.userAgent.toUpperCase())
 </script>
 
 <template>
@@ -21,7 +24,7 @@ const toggleDark = useToggle(isDark);
         class="flex-none flex flex-col justify-between w-[70px] items-center text-center select-none z-20 bg-base-200"
         style="--wails-draggable: drag"
     >
-      <div class="menu mt-12 my-4 flex flex-col gap-6 text-2xl text-base-content">
+      <div class="menu mt-10 my-4 flex flex-col gap-6 text-2xl text-base-content">
         <router-link v-for="item in menu" :key="item.text" :to="item.href" v-slot="{isActive}">
           <Icon :icon="item.icon" :class="isActive && activeClass" />
         </router-link>
@@ -50,9 +53,11 @@ const toggleDark = useToggle(isDark);
           <Icon icon="mdi:window-close" />
         </button>
       </div>
-      <div v-else class="h-8"></div>
+      <div v-else class="h-6" style="--wails-draggable:drag"></div>
       <!-- 页面内容 -->
-      <router-view class="overflow-y-auto h-screen p-4" style="--wails-draggable:none;" />
+      <div class="overflow-y-auto h-screen p-4">
+        <router-view />
+      </div>
     </div>
   </main>
 </template>
