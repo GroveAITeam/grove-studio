@@ -3,3 +3,11 @@
 @plugin "daisyui" {
     themes: light --default, dark --prefersdark;
 }
+
+@layer components {
+    .input:focus {
+        outline: none !important;
+        border-color: hsl(var(--p) / 0.5) !important;
+        --tw-ring-offset-width: 0px !important;
+    }
+}

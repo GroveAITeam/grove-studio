@@ -18,10 +18,7 @@ const greet = () => {
 
 <template>
   <div class="space-y-6 mb-6">
-    <p>首页</p>
-    <div>
-      <button type="button" @click="count++" class="btn btn-primary">计数器：{{ count }}</button>
-    </div>
+    <button type="button" @click="count++" class="btn btn-primary">计数器：{{ count }}</button>
   </div>
 
   <div class="space-y-4">

@@ -4,9 +4,9 @@ import Home from "./components/Home.vue";
 const router = createRouter({
     history: createWebHistory(),
     routes: [
-        { path: "/", name: "home", component: Home },
-        { path: "/users", component: () => import("./components/Users.vue") },
-        { path: "/setup", component: () => import("./components/Setup.vue") },
+        { path: "/", name: "首页", component: Home },
+        { path: "/users", name: '用户', component: () => import("./components/Users.vue") },
+        { path: "/setup", name: '设置', component: () => import("./components/Setup.vue") },
     ],
 });
 

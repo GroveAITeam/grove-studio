@@ -3,6 +3,7 @@ import { Icon } from '@iconify/vue';
 import {useDark, useToggle} from "@vueuse/core";
 import { WindowMinimise, WindowMaximise, WindowUnmaximise, Quit } from "../wailsjs/runtime";
 import { ref } from 'vue';
+import { useRoute } from 'vue-router';
 
 console.log('aa')
 const menu = [
@@ -14,8 +15,7 @@ const isNotMac = navigator.userAgent.toUpperCase().indexOf('MAC') < 0;
 const isMaximised = ref(false);
 let isDark = useDark()
 const toggleDark = useToggle(isDark);
-console.log(isNotMac)
-console.log(navigator.userAgent.toUpperCase())
+const route = useRoute();
 </script>
 
 <template>
@@ -42,18 +42,23 @@ console.log(navigator.userAgent.toUpperCase())
     <!-- 内容面板 -->
     <div class="pl-2 w-full bg-base-100">
       <!-- windows 定制化窗口按钮 -->
-      <div v-if="isNotMac" class="flex h-10 justify-end flex-0">
-        <button class="btn btn-ghost btn-sm w-10 h-10" @click="WindowMinimise">
-          <Icon icon="mdi:window-minimize" />
-        </button>
-        <button class="btn btn-ghost btn-sm w-10 h-10" @click="isMaximised ? (WindowUnmaximise(),isMaximised = false) : (WindowMaximise(), isMaximised = true)">
-          <Icon icon="mdi:window-maximize" />
-        </button>
-        <button class="btn btn-error btn-sm w-10 h-10 hover:text-white" @click="Quit">
-          <Icon icon="mdi:window-close" />
-        </button>
+      <div v-if="isNotMac" class="flex h-10 justify-between items-center flex-0">
+        <div class="px-4 text-base-content">{{ route.name }}</div>
+        <div class="flex">
+          <button class="btn btn-ghost btn-sm w-10 h-10" @click="WindowMinimise">
+            <Icon icon="mdi:window-minimize" />
+          </button>
+          <button class="btn btn-ghost btn-sm w-10 h-10" @click="isMaximised ? (WindowUnmaximise(),isMaximised = false) : (WindowMaximise(), isMaximised = true)">
+            <Icon icon="mdi:window-maximize" />
+          </button>
+          <button class="btn btn-error btn-sm w-10 h-10 hover:text-white" @click="Quit">
+            <Icon icon="mdi:window-close" />
+          </button>
+        </div>
       </div>
-      <div v-else class="h-6" style="--wails-draggable:drag"></div>
+      <div v-else class="h-8 flex items-center justify-center text-base-content" style="--wails-draggable:drag">
+        {{ route.name }}
+      </div>
       <!-- 页面内容 -->
       <div class="overflow-y-auto h-screen p-4">
         <router-view />
