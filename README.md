@@ -19,6 +19,6 @@ wails dev
 ## 构建
 
 ```shell 
-make make_all 
+make all
 ```
 
