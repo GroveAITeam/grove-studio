@@ -92,100 +92,100 @@ const goToApiConfig = () => {
 </script>
 
 <template>
-  <div class="llm-container">
+  <div class="bg-base-100 text-base-content p-4 flex flex-col gap-4">
     <!-- 顶部提示 -->
-    <div class="top-alert">
-      <div class="alert-icon">💡</div>
-      <div class="alert-text">API集成支持对接主流AI服务商，快速开始使用。本地模型即将推出，将提供完全的数据隐私保护和离线使用体验。</div>
+    <div class="bg-base-200/50 text-base-content border border-base-300/50 flex items-center gap-3 rounded-lg p-2">
+      <div class="text-lg">💡</div>
+      <div class="text-base-content/90 text-sm">API集成支持对接主流AI服务商，快速开始使用。本地模型即将推出，将提供完全的数据隐私保护和离线使用体验。</div>
     </div>
 
     <!-- 卡片区域 -->
-    <div class="cards-container">
+    <div class="grid grid-cols-2 gap-4 flex-1 min-w-0">
       <!-- API集成卡片 -->
-      <div class="card api-card">
-        <div class="card-header">
+      <div class="bg-base-200/50 border-base-300/50 border min-w-0 rounded-xl p-4 relative backdrop-blur-md h-full flex flex-col">
+        <div class="flex justify-between items-center mb-3">
           <h2>API集成</h2>
-          <span class="recommend-badge">推荐</span>
+          <span class="bg-primary/20 text-primary px-2 py-1 rounded text-xs">推荐</span>
         </div>
-        <div class="card-content">
-          <p class="description">快速集成主流AI服务商的API，立即开始使用</p>
+        <div class="flex flex-col gap-4">
+          <p class="text-base-content/80 text-sm">快速集成主流AI服务商的API，立即开始使用</p>
 
           <!-- 特性标签 -->
-          <div class="feature-tags">
-            <div class="feature-tag">
-              <span class="emoji">🚀</span>
+          <div class="flex flex-wrap gap-2">
+            <div class="bg-base-300/50 text-base-content flex items-center gap-1 px-2 py-1 rounded text-xs">
+              <span>🚀</span>
               即刻使用
             </div>
-            <div class="feature-tag">
-              <span class="emoji">🔌</span>
+            <div class="bg-base-300/50 text-base-content flex items-center gap-1 px-2 py-1 rounded text-xs">
+              <span>🔌</span>
               简单配置
             </div>
-            <div class="feature-tag">
-              <span class="emoji">🎯</span>
+            <div class="bg-base-300/50 text-base-content flex items-center gap-1 px-2 py-1 rounded text-xs">
+              <span>🎯</span>
               功能完整
             </div>
           </div>
 
           <!-- API提供商图标 -->
-          <div class="api-providers">
-            <div v-for="provider in apiProviders" :key="provider.name" class="provider-item">
-              <div class="provider-icon">
-                <img :src="provider.icon" :alt="provider.name">
+          <div class="flex gap-4 mb-6">
+            <div v-for="provider in apiProviders" :key="provider.name" class="bg-base-300/50 text-base-content hover:bg-base-100/50 rounded-lg p-2 transition-all duration-200">
+              <div class="bg-base-100/50 w-10 h-10 flex items-center justify-center rounded-lg">
+                <img :src="provider.icon" :alt="provider.name" class="w-6 h-6 opacity-90">
               </div>
-              <span class="provider-name">{{ provider.name }}</span>
+              <span class="text-base-content/90 text-xs">{{ provider.name }}</span>
             </div>
-            <div class="provider-item more">
-              <div class="provider-icon more-icon">
+            <div class="bg-base-300/50 text-base-content hover:bg-base-100/50 rounded-lg p-2 transition-all duration-200">
+              <div class="bg-base-100/50 w-10 h-10 flex items-center justify-center rounded-lg text-base-content/70 text-sm">
                 <span>+9</span>
               </div>
-              <span class="provider-name">更多</span>
+              <span class="text-base-content/90 text-xs">更多</span>
             </div>
           </div>
 
           <!-- API密钥提示 -->
-          <div class="api-key-notice">
-            <span class="notice-icon">ℹ️</span>
+          <div class="bg-info/20 text-info flex items-center gap-2 p-3 rounded-lg mb-6 text-sm">
+            <span>ℹ️</span>
             <span>需要您自行提供API密钥</span>
           </div>
 
-          <button class="primary-button" @click="goToApiConfig">开始配置</button>
+          <button class="bg-primary text-primary-content hover:bg-primary/90 w-full py-3 border-none rounded-lg text-sm cursor-pointer transition-all duration-200" @click="goToApiConfig">开始配置</button>
         </div>
       </div>
 
       <!-- 本地模型卡片 -->
-      <div class="card local-card">
-        <div class="coming-soon-mask">即将推出</div>
-        <div class="card-header">
+      <div class="bg-base-200/50 border-base-300/50 border min-w-0 rounded-xl p-4 relative backdrop-blur-md h-full flex flex-col">
+        <div class="bg-base-300/90 text-primary absolute top-6 right-6 px-2 py-1 rounded text-sm font-semibold z-10 backdrop-blur">即将推出</div>
+        <div class="flex justify-between items-center mb-3">
           <h2>本地模型</h2>
         </div>
-        <div class="card-content">
-          <p class="description">在您自己的设备上本地运行AI模型，完全保护数据隐私</p>
+        <div class="flex flex-col gap-4">
+          <p class="text-base-content/80 text-sm">在您自己的设备上本地运行AI模型，完全保护数据隐私</p>
 
           <!-- 特性标签 -->
-          <div class="feature-tags">
-            <div class="feature-tag">
-              <span class="emoji">🔒</span>
+          <div class="flex flex-wrap gap-2">
+            <div class="bg-base-300/50 text-base-content flex items-center gap-1 px-2 py-1 rounded text-xs">
+              <span>🔒</span>
               数据完全私有
             </div>
-            <div class="feature-tag">
-              <span class="emoji">⚡️</span>
+            <div class="bg-base-300/50 text-base-content flex items-center gap-1 px-2 py-1 rounded text-xs">
+              <span>⚡️</span>
               低延迟响应
             </div>
-            <div class="feature-tag">
-              <span class="emoji">🔌</span>
+            <div class="bg-base-300/50 text-base-content flex items-center gap-1 px-2 py-1 rounded text-xs">
+              <span>🔌</span>
               无需联网
             </div>
           </div>
 
           <!-- 简化的运行要求区域 -->
-          <div class="requirements-section">
-            <div class="requirements-header">
+          <div class="bg-base-300/50 rounded-lg p-3">
+            <div class="flex justify-between items-center mb-3">
               <h3>运行要求</h3>
-              <div class="size-tabs">
+              <div class="flex gap-1.5">
                 <button
                   v-for="size in modelSizes"
                   :key="size.id"
-                  :class="['size-tab', { active: size.active }]"
+                  :class="['bg-base-100/50 text-base-content hover:bg-base-200/50 px-2 py-1 rounded text-xs cursor-pointer', { 'bg-base-100': size.active }]"
                   @click="switchModelSize(size.id)"
                 >
                   {{ size.label }}
@@ -193,27 +193,29 @@ const goToApiConfig = () => {
               </div>
             </div>
 
-            <div class="model-info">
-              <div class="model-size">{{ currentModelInfo.size }}</div>
-              <p class="model-desc">{{ currentModelInfo.description }}</p>
+            <div>
+              <div class="bg-base-200/50 text-base-content inline-block px-2 py-1 rounded text-xs mb-1.5">{{ currentModelInfo.size }}</div>
+              <p class="text-base-content/80 text-sm mb-3">{{ currentModelInfo.description }}</p>
 
               <!-- 设备兼容性 -->
-              <div class="compatibility">
-                <div class="compatibility-header">
+              <div class="bg-base-100/50 rounded-md p-3">
+                <div class="flex items-center justify-between">
                   <span>您当前设备</span>
-                  <span :class="['compatibility-status', currentModelInfo.compatibility.status]">
+                  <span :class="[
+                    currentModelInfo.compatibility.status === 'compatible' ? 'bg-success/20 text-success' : 'bg-error/20 text-error'
+                  ]">
                     {{ currentModelInfo.compatibility.text }}
                   </span>
                 </div>
-                <div class="specs-list">
+                <div class="flex flex-col gap-1.5 mt-2">
                   <div
                     v-for="(spec, index) in currentModelInfo.compatibility.specs"
                     :key="index"
-                    class="spec-item"
+                    class="text-base-content flex items-center gap-2 text-sm"
                   >
-                    <span class="spec-icon">{{ spec.icon }}</span>
-                    <span class="spec-name">{{ spec.name }}</span>
-                    <span :class="['spec-status', { compatible: spec.compatible }]">
+                    <span>{{ spec.icon }}</span>
+                    <span>{{ spec.name }}</span>
+                    <span :class="[spec.compatible ? 'text-success' : 'text-error']">
                       {{ spec.compatible ? '✓' : '✗' }}
                     </span>
                   </div>
@@ -222,7 +224,7 @@ const goToApiConfig = () => {
             </div>
           </div>
 
-          <button class="secondary-button" disabled>敬请期待</button>
+          <button class="bg-base-300/50 text-base-content/50 w-full py-3 border-none rounded-lg text-sm cursor-not-allowed" disabled>敬请期待</button>
         </div>
       </div>
     </div>
@@ -230,253 +232,5 @@ const goToApiConfig = () => {
 </template>
 
 <style scoped>
-/* 容器基础样式 */
-.llm-container {
-  @apply bg-base-100 text-base-content;
-  padding: 16px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-/* 顶部提示样式 */
-.top-alert {
-  @apply bg-base-200/50 text-base-content border border-base-300/50;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border-radius: 8px;
-  padding: 8px 16px;
-}
-
-.alert-icon {
-  font-size: 18px;
-}
-
-.alert-text {
-  @apply text-base-content/90;
-  font-size: 13px;
-}
-
-.cards-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  flex: 1;
-  min-width: 0;
-}
-
-/* 卡片基础样式 */
-.card {
-  @apply bg-base-200/50 border-base-300/50 border;
-  min-width: 0;
-  border-radius: 12px;
-  padding: 16px;
-  position: relative;
-  backdrop-filter: blur(8px);
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.card-content {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.description {
-  @apply text-base-content/80;
-  font-size: 13px;
-}
-
-.feature-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.feature-tag {
-  @apply bg-base-300/50 text-base-content;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-}
-
-.requirements-section {
-  @apply bg-base-300/50;
-  border-radius: 8px;
-  padding: 12px;
-}
-
-.requirements-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.size-tabs {
-  display: flex;
-  gap: 6px;
-}
-
-.size-tab {
-  @apply bg-base-100/50 text-base-content hover:bg-base-200/50;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.compatibility {
-  @apply bg-base-100/50;
-  border-radius: 6px;
-  padding: 12px;
-}
-
-.model-size {
-  @apply bg-base-200/50 text-base-content;
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  margin-bottom: 6px;
-}
-
-.model-desc {
-  @apply text-base-content/80;
-  font-size: 13px;
-  margin-bottom: 12px;
-}
-
-.specs-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.spec-item {
-  @apply text-base-content;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-}
-
-/* 其他样式保持不变 */
-.recommend-badge {
-  @apply bg-primary/20 text-primary;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-}
-
-.api-providers {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-/* API提供商图标 */
-.provider-item {
-  @apply bg-base-300/50 text-base-content hover:bg-base-100/50;
-  border-radius: 8px;
-  padding: 8px;
-  transition: all 0.2s;
-}
-
-.provider-icon {
-  @apply bg-base-100/50;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-}
-
-.provider-icon img {
-  width: 24px;
-  height: 24px;
-  @apply opacity-90;
-}
-
-.more-icon {
-  @apply text-base-content/70;
-  font-size: 14px;
-}
-
-.provider-name {
-  @apply text-base-content/90;
-  font-size: 12px;
-}
-
-/* API密钥提示 */
-.api-key-notice {
-  @apply bg-info/20 text-info;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 24px;
-  font-size: 14px;
-}
-
-/* 按钮样式 */
-.primary-button {
-  @apply bg-primary text-primary-content hover:bg-primary/90;
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.secondary-button {
-  @apply bg-base-300/50 text-base-content/50;
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  cursor: not-allowed;
-}
-
-/* 即将推出遮罩 */
-.coming-soon-mask {
-  @apply bg-base-300/90 text-primary;
-  position: absolute;
-  top: 24px;
-  right: 24px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 600;
-  z-index: 1;
-  backdrop-filter: blur(4px);
-}
-
-/* 兼容性状态 */
-.compatibility-status.compatible {
-  @apply bg-success/20 text-success;
-}
-
-.compatibility-status.incompatible {
-  @apply bg-error/20 text-error;
-}
+/* 所有样式已转换为Tailwind类，不再需要scoped CSS */
 </style>
