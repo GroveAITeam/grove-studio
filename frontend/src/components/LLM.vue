@@ -1,8 +1,11 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import OpenAIIcon from '../assets/icons/placeholder-openai.svg';
 import ClaudeIcon from '../assets/icons/placeholder-claude.svg';
 import GeminiIcon from '../assets/icons/placeholder-gemini.svg';
+
+const router = useRouter();
 
 // 模型大小选项
 const modelSizes = ref([
@@ -81,6 +84,11 @@ const switchModelSize = (size: string) => {
     };
   }
 };
+
+// 跳转到API配置页面
+const goToApiConfig = () => {
+  router.push('/api');
+};
 </script>
 
 <template>
@@ -140,7 +148,7 @@ const switchModelSize = (size: string) => {
             <span>需要您自行提供API密钥</span>
           </div>
 
-          <button class="primary-button">开始配置</button>
+          <button class="primary-button" @click="goToApiConfig">开始配置</button>
         </div>
       </div>
 

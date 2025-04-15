@@ -6,6 +6,7 @@ const router = createRouter({
     routes: [
         { path: "/", name: "Grove Studio", component: Home },
         { path: "/llm", name: '对话模型', component: () => import("./components/LLM.vue") },
+        { path: "/api", name: 'API集成', component: () => import("./components/API.vue") },
         { path: "/setup", name: '设置', component: () => import("./components/Setup.vue") },
     ],
 });
