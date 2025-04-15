@@ -167,17 +167,9 @@ const switchModelSize = (size: string) => {
               <span class="emoji">🔌</span>
               无需联网
             </div>
-            <div class="feature-tag">
-              <span class="emoji">🚀</span>
-              一键安装
-            </div>
-            <div class="feature-tag">
-              <span class="emoji">📚</span>
-              多种开源模型
-            </div>
           </div>
 
-          <!-- 运行要求区域 -->
+          <!-- 简化的运行要求区域 -->
           <div class="requirements-section">
             <div class="requirements-header">
               <h3>运行要求</h3>
@@ -196,26 +188,6 @@ const switchModelSize = (size: string) => {
             <div class="model-info">
               <div class="model-size">{{ currentModelInfo.size }}</div>
               <p class="model-desc">{{ currentModelInfo.description }}</p>
-
-              <!-- 用例列表 -->
-              <div class="use-cases">
-                <div class="use-case">
-                  <span class="use-case-icon">📝</span>
-                  <span>文本整理与总结：整理会议记录、总结文档要点</span>
-                </div>
-                <div class="use-case">
-                  <span class="use-case-icon">💬</span>
-                  <span>日常对话：简单问答、基础知识咨询</span>
-                </div>
-                <div class="use-case">
-                  <span class="use-case-icon">✍️</span>
-                  <span>文案创作：编写简单文案、社交媒体内容</span>
-                </div>
-                <div class="use-case">
-                  <span class="use-case-icon">🔍</span>
-                  <span>知识库搜索：快速检索本地文档</span>
-                </div>
-              </div>
 
               <!-- 设备兼容性 -->
               <div class="compatibility">
@@ -243,7 +215,6 @@ const switchModelSize = (size: string) => {
           </div>
 
           <button class="secondary-button" disabled>敬请期待</button>
-          <p class="coming-soon-note">我们正在开发本地模型功能，将第一时间通知您</p>
         </div>
       </div>
     </div>
@@ -254,12 +225,11 @@ const switchModelSize = (size: string) => {
 /* 容器基础样式 */
 .llm-container {
   @apply bg-base-100 text-base-content;
-  min-height: 100%;
-  padding: 24px;
+  padding: 16px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
 /* 顶部提示样式 */
@@ -269,41 +239,24 @@ const switchModelSize = (size: string) => {
   align-items: center;
   gap: 12px;
   border-radius: 8px;
-  padding: 12px 16px;
+  padding: 8px 16px;
 }
 
 .alert-icon {
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .alert-text {
   @apply text-base-content/90;
-  font-size: 14px;
-}
-
-.title-section {
-  text-align: center;
-  margin-bottom: 32px;
-}
-
-.title-section h1 {
-  font-size: 24px;
-  font-weight: 600;
-  color: #111827;
-  margin-bottom: 8px;
-}
-
-.title-section p {
-  font-size: 14px;
-  color: #6B7280;
+  font-size: 13px;
 }
 
 .cards-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  gap: 16px;
   flex: 1;
-  min-width: 0; /* 防止溢出 */
+  min-width: 0;
 }
 
 /* 卡片基础样式 */
@@ -311,52 +264,112 @@ const switchModelSize = (size: string) => {
   @apply bg-base-200/50 border-base-300/50 border;
   min-width: 0;
   border-radius: 12px;
-  padding: 24px;
+  padding: 16px;
   position: relative;
   backdrop-filter: blur(8px);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
-  position: relative;
+  margin-bottom: 12px;
 }
 
-.card-header h2 {
-  @apply text-base-content;
-  font-size: 20px;
-  font-weight: 600;
-}
-
-/* 推荐标签 */
-.recommend-badge {
-  @apply bg-primary/20 text-primary;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .description {
   @apply text-base-content/80;
-  font-size: 14px;
-  margin-bottom: 24px;
+  font-size: 13px;
 }
 
 .feature-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 24px;
 }
 
-/* 特性标签 */
 .feature-tag {
   @apply bg-base-300/50 text-base-content;
   display: flex;
   align-items: center;
   gap: 4px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.requirements-section {
+  @apply bg-base-300/50;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.requirements-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.size-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.size-tab {
+  @apply bg-base-100/50 text-base-content hover:bg-base-200/50;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.compatibility {
+  @apply bg-base-100/50;
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.model-size {
+  @apply bg-base-200/50 text-base-content;
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.model-desc {
+  @apply text-base-content/80;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.specs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.spec-item {
+  @apply text-base-content;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+/* 其他样式保持不变 */
+.recommend-badge {
+  @apply bg-primary/20 text-primary;
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
@@ -450,93 +463,6 @@ const switchModelSize = (size: string) => {
   backdrop-filter: blur(4px);
 }
 
-/* 运行要求区域 */
-.requirements-section {
-  @apply bg-base-300/50;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 24px;
-}
-
-.requirements-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.requirements-header h3 {
-  @apply text-base-content font-semibold;
-  font-size: 16px;
-}
-
-.size-tabs {
-  display: flex;
-  gap: 8px;
-}
-
-/* 大小选择标签 */
-.size-tab {
-  @apply bg-base-100/50 text-base-content border-base-300/50 hover:bg-base-200/50;
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.size-tab.active {
-  @apply bg-primary text-primary-content border-primary;
-}
-
-.model-size {
-  @apply bg-base-200/50 text-base-content;
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  margin-bottom: 8px;
-}
-
-.model-desc {
-  @apply text-base-content/80;
-  font-size: 14px;
-  margin-bottom: 16px;
-}
-
-.use-cases {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-/* 用例列表 */
-.use-case {
-  @apply bg-base-100/50 text-base-content;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.compatibility {
-  @apply bg-base-100/50;
-  border-radius: 8px;
-  padding: 16px;
-}
-
-.compatibility-header {
-  @apply text-base-content;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  font-size: 14px;
-}
-
 /* 兼容性状态 */
 .compatibility-status.compatible {
   @apply bg-success/20 text-success;
@@ -544,38 +470,5 @@ const switchModelSize = (size: string) => {
 
 .compatibility-status.incompatible {
   @apply bg-error/20 text-error;
-}
-
-.specs-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* 规格列表 */
-.spec-item {
-  @apply text-base-content;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-}
-
-.spec-status {
-  @apply text-base-content/50;
-  margin-left: auto;
-}
-
-.spec-status.compatible {
-  @apply text-success;
-}
-
-/* 即将推出提示 */
-.coming-soon-note {
-  @apply text-base-content/60;
-  text-align: center;
-  font-size: 14px;
-  font-style: italic;
-  margin-top: 12px;
 }
 </style>
