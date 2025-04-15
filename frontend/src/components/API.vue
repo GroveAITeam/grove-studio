@@ -348,61 +348,61 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container">
-    <header>
-      <h1>API管理</h1>
-      <p class="header-desc">管理您的API密钥</p>
+  <div class="container mx-auto px-5 max-w-6xl">
+    <header class="mb-6">
+      <h1 class="text-2xl font-semibold mb-2 text-base-content">API管理</h1>
+      <p class="text-base text-base-content/70">管理您的API密钥</p>
     </header>
 
-    <div class="quick-help">
-      <div class="help-icon">💡</div>
-      <div class="help-content">
-        <p><span class="emphasis">自定义API</span>允许您使用第三方AI服务。请前往服务商官网获取API密钥，并在此页面进行设置。</p>
+    <div class="bg-primary/10 rounded-lg p-4 mb-6 flex gap-4">
+      <div class="text-2xl">💡</div>
+      <div class="flex flex-col gap-2">
+        <p><span class="font-semibold">自定义API</span>允许您使用第三方AI服务。请前往服务商官网获取API密钥，并在此页面进行设置。</p>
         <p>所有API密钥均存储在您的本地设备，不会上传至Grove服务器，确保您的账户安全。</p>
       </div>
     </div>
 
-    <div class="privacy-alert">
-      <span class="icon">🔒</span>
-      <div class="privacy-message">
+    <div class="bg-warning/10 rounded-lg p-4 mb-6 flex gap-4">
+      <span class="text-2xl">🔒</span>
+      <div class="text-sm leading-relaxed">
         <strong>隐私提示：</strong>第三方API服务可能会收集和存储您的数据。对于敏感数据，我们强烈推荐使用本地私有化模型，确保您的数据始终在本地处理，不经过任何外部服务器。
       </div>
     </div>
 
     <main>
       <!-- API列表和添加按钮容器 -->
-      <div class="api-container">
+      <div class="flex flex-col gap-5 mb-6">
         <!-- 添加API按钮 - 移到顶部 -->
-        <button class="add-api-btn" @click="showAddApiForm">
-          <span class="add-icon">+</span>
+        <button class="btn btn-primary self-start flex items-center gap-2" @click="showAddApiForm">
+          <span class="text-base font-bold">+</span>
           <span>添加新API</span>
         </button>
 
         <!-- API列表区域 - 添加最大高度和滚动 -->
-        <div class="api-list">
+        <div class="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-4">
           <!-- 空状态显示 -->
-          <div class="empty-state" v-if="apis.length === 0">
-            <div class="empty-icon">🔑</div>
-            <p>您还没有添加任何API密钥</p>
+          <div class="flex flex-col items-center justify-center py-10 px-5 bg-base-200/30 rounded-lg text-center" v-if="apis.length === 0">
+            <div class="text-3xl opacity-70 mb-4">🔑</div>
+            <p class="text-base-content/70 mb-5">您还没有添加任何API密钥</p>
           </div>
 
           <!-- API列表 -->
-          <div v-for="api in apis" :key="api.id" class="api-item">
-            <div class="api-info">
-              <img :src="getProviderIcon(api.provider)" class="api-logo" :alt="api.provider">
-              <div class="api-details">
-                <span class="api-name">{{ api.name }}</span>
-                <span class="api-provider">{{ api.provider }}</span>
+          <div v-for="api in apis" :key="api.id" class="flex items-center justify-between p-4 bg-base-200/20 rounded-lg border border-base-300 transition-all hover:bg-base-200/40">
+            <div class="flex items-center gap-3">
+              <img :src="getProviderIcon(api.provider)" class="w-10 h-10 object-contain" :alt="api.provider">
+              <div class="flex flex-col">
+                <span class="font-medium text-base text-base-content">{{ api.name }}</span>
+                <span class="text-sm text-base-content/70">{{ api.provider }}</span>
               </div>
             </div>
-            <div class="api-actions">
-              <button class="action-btn" @click="editApi(api.id)">
+            <div class="flex gap-2">
+              <button class="btn btn-ghost btn-sm text-base-content/70 hover:text-base-content hover:bg-base-300/50" @click="editApi(api.id)">
                 <span>编辑</span>
               </button>
-              <button class="action-btn delete-btn" @click="deleteApi(api.id)">
+              <button class="btn btn-ghost btn-sm text-base-content/70 hover:text-error hover:bg-base-300/50" @click="deleteApi(api.id)">
                 <span>删除</span>
               </button>
-              <button class="action-btn" @click="viewUsageStats(api.id)">
+              <button class="btn btn-ghost btn-sm text-base-content/70 hover:text-base-content hover:bg-base-300/50" @click="viewUsageStats(api.id)">
                 <span>使用统计</span>
               </button>
             </div>
@@ -412,77 +412,77 @@ onMounted(() => {
 
       <!-- 添加/编辑API表单 弹窗 -->
       <Teleport to="body">
-        <div class="form-overlay" v-if="showForm" @click.self="hideAddApiForm"></div>
-        <div class="add-api-form" v-if="showForm">
+        <div class="fixed inset-0 bg-black/50 z-50" v-if="showForm" @click.self="hideAddApiForm"></div>
+        <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-xl shadow-lg w-[90%] max-w-[600px] max-h-[90vh] overflow-y-auto z-50" v-if="showForm">
           <form @submit.prevent="handleFormSubmit">
-            <div class="form-group provider-options">
+            <div class="mb-5">
               <!-- API提供商选项 -->
-              <div class="provider-grid">
+              <div class="grid grid-cols-3 gap-3 mb-4 md:grid-cols-3 sm:grid-cols-2">
                 <div
                   v-for="provider in providers"
                   :key="provider.id"
-                  class="provider-option"
-                  :class="{ selected: selectedProvider === provider.id }"
+                  class="flex flex-col items-center gap-2 p-4 border border-base-300 rounded-lg cursor-pointer transition-all hover:bg-base-200/20"
+                  :class="{ 'border-primary bg-primary/5': selectedProvider === provider.id }"
                   :data-provider="provider.id"
                   @click="selectProvider(provider.id)"
                 >
-                  <img :src="provider.icon" :alt="provider.name">
-                  <span>{{ provider.name }}</span>
+                  <img :src="provider.icon" class="w-8 h-8 object-contain" :alt="provider.name">
+                  <span class="text-sm">{{ provider.name }}</span>
                 </div>
               </div>
             </div>
 
-            <div class="form-group">
-              <label for="apiName">名称</label>
-              <input type="text" id="apiName" v-model="formData.name" required placeholder="为这个API起个名字">
+            <div class="mb-5">
+              <label for="apiName" class="block mb-2 font-medium text-base-content">名称</label>
+              <input type="text" id="apiName" v-model="formData.name" required placeholder="为这个API起个名字" class="input input-bordered w-full">
             </div>
 
-            <div class="form-group">
-              <label for="apiKey">API密钥</label>
-              <div class="input-group">
-                <input :type="showPassword ? 'text' : 'password'" id="apiKey" v-model="formData.apiKey" required>
-                <button type="button" class="toggle-password" @click="togglePasswordVisibility">
-                  <span class="show-icon" :style="{ opacity: showPassword ? '1' : '0.5' }">👁️</span>
+            <div class="mb-5">
+              <label for="apiKey" class="block mb-2 font-medium text-base-content">API密钥</label>
+              <div class="relative flex">
+                <input :type="showPassword ? 'text' : 'password'" id="apiKey" v-model="formData.apiKey" required class="input input-bordered w-full pr-10">
+                <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center" @click="togglePasswordVisibility">
+                  <span class="text-base" :class="{ 'opacity-100': showPassword, 'opacity-50': !showPassword }">👁️</span>
                 </button>
               </div>
-              <div class="api-help-text" v-if="selectedProvider && providerHelp[selectedProvider]">
-                <div class="provider-help">
-                  <div class="help-header">
-                    <span class="help-icon">ℹ️</span>
-                    <span class="help-title">如何获取API密钥</span>
+              <div v-if="selectedProvider && providerHelp[selectedProvider]" class="mt-3">
+                <div class="border border-base-300 rounded-lg overflow-hidden">
+                  <div class="flex items-center gap-2 p-3 bg-base-200/20 border-b border-base-300">
+                    <span class="text-base">ℹ️</span>
+                    <span class="font-medium text-sm">如何获取API密钥</span>
                   </div>
-                  <div class="help-content">
-                    <p class="help-description">{{ providerHelp[selectedProvider].description }}</p>
-                    <div class="help-steps" v-html="providerHelp[selectedProvider].helpText"></div>
+                  <div class="p-3">
+                    <p class="text-sm">{{ providerHelp[selectedProvider].description }}</p>
+                    <div class="mt-3 text-sm" v-html="providerHelp[selectedProvider].helpText"></div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div class="form-group">
-              <div class="advanced-toggle" @click="toggleAdvancedOptions">
+            <div class="mb-5">
+              <div class="flex items-center justify-between py-2 cursor-pointer text-base-content/70" @click="toggleAdvancedOptions">
                 <span>{{ showAdvanced ? '隐藏高级选项' : '显示高级选项' }}</span>
-                <span class="arrow-icon">▾</span>
+                <span class="transition-transform" :class="{ 'rotate-180': showAdvanced }">▾</span>
               </div>
             </div>
 
-            <div class="advanced-options" v-if="showAdvanced">
-              <div class="form-group">
-                <label for="defaultModel">默认模型</label>
-                <select id="defaultModel" v-model="formData.defaultModel">
+            <div v-if="showAdvanced" class="border-t border-base-300 pt-4 mt-4">
+              <div class="mb-5">
+                <label for="defaultModel" class="block mb-2 font-medium text-base-content">默认模型</label>
+                <select id="defaultModel" v-model="formData.defaultModel" class="select select-bordered w-full">
                   <option v-for="model in availableModels" :key="model" :value="model">{{ model }}</option>
                 </select>
               </div>
 
-              <div class="form-group">
-                <label for="baseUrl">API基础URL</label>
-                <input type="url" id="baseUrl" v-model="formData.baseUrl" placeholder="可选，用于自定义API端点">
+              <div class="mb-5">
+                <label for="baseUrl" class="block mb-2 font-medium text-base-content">API基础URL</label>
+                <input type="url" id="baseUrl" v-model="formData.baseUrl" placeholder="可选，用于自定义API端点" class="input input-bordered w-full">
               </div>
             </div>
 
-            <div class="form-actions">
-              <button type="button" class="secondary-btn" @click="hideAddApiForm">取消</button>
-              <button type="submit" class="primary-btn">保存</button>
+            <div class="flex justify-end gap-3 mt-6 md:flex-row sm:flex-col">
+              <button type="button" class="btn btn-outline" @click="hideAddApiForm">取消</button>
+              <button type="submit" class="btn btn-primary">保存</button>
             </div>
           </form>
         </div>
@@ -490,38 +490,42 @@ onMounted(() => {
 
       <!-- 使用统计弹窗 -->
       <Teleport to="body">
-        <div class="form-overlay" v-if="showUsage" @click.self="hideUsageStats"></div>
-        <div class="add-api-form" v-if="showUsage && currentApi">
-          <div class="usage-stats">
-            <div class="usage-header">
-              <h2 class="usage-title">{{ currentApi.name }} 使用统计</h2>
-              <div class="usage-period">过去30天</div>
+        <div class="fixed inset-0 bg-black/50 z-50" v-if="showUsage" @click.self="hideUsageStats"></div>
+        <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-xl shadow-lg w-[90%] max-w-[600px] max-h-[90vh] overflow-y-auto z-50" v-if="showUsage && currentApi">
+          <div class="p-4">
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-lg font-semibold">{{ currentApi.name }} 使用统计</h2>
+              <div class="text-sm text-base-content/70">过去30天</div>
             </div>
 
-            <div class="usage-metrics">
-              <div class="usage-metric">
-                <div class="metric-value">{{ usageData.tokensUsed.toLocaleString() }}</div>
-                <div class="metric-label">令牌使用量</div>
+            <div class="flex gap-6 mb-6">
+              <div class="flex-1 flex flex-col items-center bg-base-200/20 rounded-lg p-4">
+                <div class="text-2xl font-semibold mb-1">{{ usageData.tokensUsed.toLocaleString() }}</div>
+                <div class="text-sm text-base-content/70">令牌使用量</div>
               </div>
-              <div class="usage-metric">
-                <div class="metric-value">${{ usageData.costEstimate.toFixed(2) }}</div>
-                <div class="metric-label">估计费用</div>
+              <div class="flex-1 flex flex-col items-center bg-base-200/20 rounded-lg p-4">
+                <div class="text-2xl font-semibold mb-1">${{ usageData.costEstimate.toFixed(2) }}</div>
+                <div class="text-sm text-base-content/70">估计费用</div>
               </div>
             </div>
 
-            <div class="usage-progress">
-              <div class="progress-label">配额使用：{{ usageData.quotaPercentage }}%</div>
-              <div class="progress-bar-container">
+            <div class="mb-6">
+              <div class="flex justify-between mb-2 text-sm">配额使用：{{ usageData.quotaPercentage }}%</div>
+              <div class="h-2 bg-base-200/50 rounded-full overflow-hidden">
                 <div
-                  class="progress-bar"
-                  :class="getProgressBarClass(usageData.quotaPercentage)"
+                  class="h-full rounded-full transition-all"
+                  :class="{
+                    'bg-primary': usageData.quotaPercentage <= 70,
+                    'bg-warning': usageData.quotaPercentage > 70 && usageData.quotaPercentage <= 90,
+                    'bg-error': usageData.quotaPercentage > 90
+                  }"
                   :style="{ width: usageData.quotaPercentage + '%' }"
                 ></div>
               </div>
             </div>
 
-            <div class="form-actions">
-              <button type="button" class="secondary-btn" @click="hideUsageStats">关闭</button>
+            <div class="flex justify-end">
+              <button type="button" class="btn btn-outline" @click="hideUsageStats">关闭</button>
             </div>
           </div>
         </div>
@@ -531,538 +535,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* API管理页面特定样式 */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
-
-header {
-  margin-bottom: 24px;
-}
-
-h1 {
-  margin-bottom: 8px;
-  font-size: 28px;
-  font-weight: 600;
-  color: var(--text-color);
-}
-
-.header-desc {
-  color: var(--text-secondary);
-  font-size: 16px;
-}
-
-/* 快速帮助 */
-.quick-help {
-  display: flex;
-  gap: 16px;
-  padding: 16px;
-  background-color: rgba(59, 130, 246, 0.1);
-  border-radius: 8px;
-  margin-bottom: 24px;
-}
-
-.help-icon {
-  font-size: 24px;
-}
-
-.help-content {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.emphasis {
-  font-weight: 600;
-}
-
-/* 隐私提示 */
-.privacy-alert {
-  display: flex;
-  gap: 16px;
-  padding: 16px;
-  background-color: rgba(245, 158, 11, 0.1);
-  border-radius: 8px;
-  margin-bottom: 24px;
-}
-
-.icon {
-  font-size: 24px;
-}
-
-.privacy-message {
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.privacy-message strong {
-  font-weight: 600;
-}
-
-/* API列表区域 */
-.api-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  margin-bottom: 24px;
-}
-
-.add-api-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background-color: var(--primary-color, #1a56db);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 16px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  align-self: flex-start;
-}
-
-.add-api-btn:hover {
-  background-color: var(--primary-hover, #0e4dbf);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.add-icon {
-  font-size: 16px;
-  font-weight: bold;
-}
-
-/* 空状态样式 */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-  background-color: rgba(0, 0, 0, 0.03);
-  border-radius: 8px;
-  text-align: center;
-}
-
-.empty-icon {
-  font-size: 36px;
-  margin-bottom: 16px;
-  opacity: 0.7;
-}
-
-.empty-state p {
-  color: var(--text-secondary, #6b7280);
-  margin-bottom: 20px;
-}
-
-/* API列表样式 */
-.api-list {
-  max-height: 500px;
-  overflow-y: auto;
-  padding-right: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.api-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px;
-  background-color: rgba(0, 0, 0, 0.02);
-  border-radius: 8px;
-  border: 1px solid var(--border-color, #e5e7eb);
-  transition: all 0.3s ease;
-}
-
-.api-item:hover {
-  background-color: rgba(0, 0, 0, 0.04);
-}
-
-.api-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.api-logo {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
-}
-
-.api-details {
-  display: flex;
-  flex-direction: column;
-}
-
-.api-name {
-  font-weight: 500;
-  color: var(--text-color, #1f2937);
-  font-size: 16px;
-}
-
-.api-provider {
-  color: var(--text-secondary, #6b7280);
-  font-size: 14px;
-}
-
-.api-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.action-btn {
-  background: none;
-  border: none;
-  color: var(--text-secondary, #6b7280);
-  cursor: pointer;
-  padding: 6px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-}
-
-.action-btn:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-  color: var(--text-color, #1f2937);
-}
-
-.delete-btn:hover {
-  color: var(--error-color, #dc2626);
-}
-
-/* 添加API表单 */
-.add-api-form {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
-  width: 90%;
-  max-width: 600px;
-  max-height: 90vh;
-  overflow-y: auto;
-  z-index: 1000;
-}
-
-.form-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 999;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
-  color: var(--text-color, #1f2937);
-}
-
-input[type="text"],
-input[type="password"],
-input[type="url"],
-select {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid var(--border-color, #e5e7eb);
-  border-radius: 6px;
-  font-size: 14px;
-  transition: border-color 0.3s;
-}
-
-input[type="text"]:focus,
-input[type="password"]:focus,
-input[type="url"]:focus,
-select:focus {
-  border-color: var(--primary-color, #1a56db);
-  outline: none;
-}
-
-.input-group {
-  position: relative;
-  display: flex;
-}
-
-.toggle-password {
-  background: none;
-  border: none;
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.show-icon {
-  font-size: 16px;
-  opacity: 0.5;
-  transition: opacity 0.2s;
-}
-
-/* 提供商选项 */
-.provider-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.provider-option {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 16px;
-  border: 1px solid var(--border-color, #e5e7eb);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.provider-option img {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-}
-
-.provider-option span {
-  font-size: 14px;
-}
-
-.provider-option:hover {
-  background-color: rgba(0, 0, 0, 0.02);
-}
-
-.provider-option.selected {
-  border-color: var(--primary-color, #1a56db);
-  background-color: rgba(59, 130, 246, 0.05);
-}
-
-/* 高级选项 */
-.advanced-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 0;
-  cursor: pointer;
-  color: var(--text-secondary, #6b7280);
-}
-
-.arrow-icon {
-  transition: transform 0.3s;
-}
-
-.advanced-options {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border-color, #e5e7eb);
-}
-
-/* 表单按钮 */
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 24px;
-}
-
-.secondary-btn,
-.primary-btn {
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.secondary-btn {
-  background: none;
-  border: 1px solid var(--border-color, #e5e7eb);
-  color: var(--text-color, #1f2937);
-}
-
-.primary-btn {
-  background-color: var(--primary-color, #1a56db);
-  border: none;
-  color: white;
-}
-
-.secondary-btn:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.primary-btn:hover {
-  background-color: var(--primary-hover, #0e4dbf);
-}
-
-/* 提供商帮助 */
-.provider-help {
-  margin-top: 12px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color, #e5e7eb);
-  overflow: hidden;
-}
-
-.help-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px;
-  background-color: rgba(0, 0, 0, 0.02);
-  border-bottom: 1px solid var(--border-color, #e5e7eb);
-}
-
-.help-icon {
-  font-size: 16px;
-}
-
-.help-title {
-  font-weight: 500;
-  font-size: 14px;
-}
-
-.help-content {
-  padding: 12px;
-}
-
-.help-steps {
-  margin-top: 12px;
-  font-size: 14px;
-}
-
-.help-steps ol {
-  padding-left: 24px;
-}
-
-.help-steps li {
-  margin-bottom: 8px;
-}
-
-.help-steps a {
-  color: var(--primary-color, #1a56db);
-  text-decoration: none;
-}
-
-/* 使用统计 */
-.usage-stats {
-  padding: 16px;
-}
-
-.usage-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.usage-title {
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.usage-period {
-  font-size: 14px;
-  color: var(--text-secondary, #6b7280);
-}
-
-.usage-metrics {
-  display: flex;
-  gap: 24px;
-  margin-bottom: 24px;
-}
-
-.usage-metric {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: rgba(0, 0, 0, 0.02);
-  border-radius: 8px;
-  padding: 16px;
-}
-
-.metric-value {
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.metric-label {
-  font-size: 14px;
-  color: var(--text-secondary, #6b7280);
-}
-
-.usage-progress {
-  margin-bottom: 24px;
-}
-
-.progress-label {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  font-size: 14px;
-}
-
-.progress-bar-container {
-  height: 8px;
-  background-color: rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.progress-bar {
-  height: 100%;
-  background-color: var(--primary-color, #1a56db);
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-
-.progress-bar.warning {
-  background-color: #f59e0b;
-}
-
-.progress-bar.danger {
-  background-color: #dc2626;
-}
-
-/* 响应式调整 */
-@media (max-width: 768px) {
-  .provider-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .api-info {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .form-actions {
-    flex-direction: column;
-  }
-
-  .form-actions button {
-    width: 100%;
-  }
-}
-
-/* 提示消息 */
 :global(.toast) {
   position: fixed;
   bottom: 24px;
