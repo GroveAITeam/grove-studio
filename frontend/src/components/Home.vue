@@ -1,27 +1,6 @@
 <script lang="ts" setup>
-import { ref, reactive, onMounted, computed } from 'vue'
-import { Greet } from '../../wailsjs/go/main/App'
+import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { Icon } from '@iconify/vue';
-
-const count = ref(0)
-const data = reactive({
-  name: "",
-  resultText: "请输入你的名字: ",
-})
-
-const greet = () => {
-  Greet(data.name).then(result => {
-    data.resultText = result
-  })
-}
-
-const features = [
-  { title: "简单易用", description: "一键安装，双击即可使用", icon: "material-symbols:touch-app-outline" },
-  { title: "隐私安全", description: "所有数据留在你的设备上，支持离线使用", icon: "material-symbols:security" },
-  { title: "多种模型", description: "支持deepseek、Llama、千问等主流模型", icon: "material-symbols:model-training" },
-  { title: "基础服务", description: "知识库、联网搜索、规则引擎等常用功能", icon: "material-symbols:cloud-done" },
-  { title: "丰富应用", description: "总结、翻译、创作、服务部署等实用应用", icon: "material-symbols:apps" },
-]
 
 // 类型定义
 interface Conversation {
@@ -93,6 +72,11 @@ const toggleSettings = () => {
   showSettings.value = !showSettings.value
 }
 
+// 监听消息变化自动滚动
+watch(messages, () => {
+  setTimeout(scrollToBottom, 50)
+}, { deep: true })
+
 // 发送消息
 const sendMessage = () => {
   if (!messageInput.value.trim()) return
@@ -146,7 +130,6 @@ const sendMessage = () => {
       if (index < responseText.length) {
         lastMessage.content += responseText[index]
         index++
-        scrollToBottom()
       } else {
         clearInterval(interval)
         lastMessage.typing = false
@@ -221,6 +204,9 @@ const switchConversation = (conversation: Conversation) => {
       }
     ]
   }
+
+  // 滚动到底部
+  setTimeout(scrollToBottom, 50)
 }
 
 // 删除对话
@@ -251,6 +237,13 @@ const handleKeyDown = (event: KeyboardEvent) => {
     event.preventDefault()
     sendMessage()
   }
+}
+
+// 自动调整输入框高度
+const adjustTextareaHeight = (event: Event) => {
+  const textarea = event.target as HTMLTextAreaElement
+  textarea.style.height = 'auto'
+  textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`
 }
 
 // 格式化消息内容（支持Markdown语法）
@@ -293,19 +286,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <!-- 适配App.vue内页，使用flex布局填充可用空间 -->
   <div class="flex flex-col h-full w-full overflow-hidden">
     <!-- 聊天界面 -->
     <div class="flex flex-1 overflow-hidden">
-      <!-- 侧边栏 -->
-      <aside class="w-56 border-r border-gray-200 bg-gray-50 flex flex-col overflow-hidden">
-        <div class="p-2 border-b border-gray-200">
-          <button @click="createNewChat" class="btn btn-sm btn-ghost justify-start w-full bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md py-2 text-sm">
-            <Icon icon="material-symbols:add" class="mr-2" />
-            新对话
+      <!-- 侧边栏 - 白色背景 -->
+      <aside class="w-56 border-r border-gray-200 flex flex-col overflow-hidden">
+        <div class="p-2 border-gray-200">
+          <!-- 新对话按钮 -->
+          <button @click="createNewChat" class="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md py-2 text-sm transition-colors">
+            <Icon icon="material-symbols:add" />
+            <span>新对话</span>
           </button>
         </div>
 
+        <!-- 对话列表 -->
         <div class="overflow-y-auto flex-1 p-2">
           <template v-for="(group, groupName) in conversations.reduce((groups: Record<string, Conversation[]>, conv) => {
             (groups[conv.group] = groups[conv.group] || []).push(conv);
@@ -314,13 +308,13 @@ onMounted(() => {
             <div class="mb-2">
               <div class="text-xs text-gray-500 uppercase px-2 mb-1 font-medium">{{ groupName }}</div>
               <div v-for="(conversation, index) in group" :key="conversation.id"
-                   :class="['flex items-center gap-1 px-2 py-1.5 rounded-md cursor-pointer hover:bg-gray-200 text-sm',
-                   conversation.active ? 'bg-gray-200' : '']"
+                   :class="['flex items-center gap-1 px-2 py-1.5 rounded-md cursor-pointer transition-colors',
+                   conversation.active ? 'bg-gray-100' : 'hover:bg-gray-50']"
                    @click="switchConversation(conversation)">
                 <Icon icon="material-symbols:chat" class="text-base text-gray-600" />
-                <span class="flex-1 truncate">{{ conversation.title }}</span>
+                <span class="flex-1 truncate text-sm">{{ conversation.title }}</span>
                 <button @click="(event) => deleteConversation(conversations.indexOf(conversation), event)"
-                        class="opacity-0 hover:opacity-100 hover:bg-gray-300 p-0.5 rounded-md group-hover:opacity-100">
+                        class="opacity-0 hover:opacity-100 hover:bg-gray-200 p-0.5 rounded-md group-hover:opacity-100 transition-opacity">
                   <Icon icon="material-symbols:close" class="text-xs text-gray-500" />
                 </button>
               </div>
@@ -335,7 +329,7 @@ onMounted(() => {
         <div class="border-b border-gray-200 p-2 flex justify-between items-center">
           <h2 class="text-base font-medium text-gray-800">{{ activeConversation.title }}</h2>
           <div class="flex gap-2">
-            <button @click="toggleSettings" class="p-1.5 text-gray-500 hover:bg-gray-100 rounded-md">
+            <button @click="toggleSettings" class="p-1.5 text-gray-500 hover:bg-gray-100 rounded-md transition-colors">
               <Icon icon="material-symbols:settings" class="text-lg" />
             </button>
           </div>
@@ -345,7 +339,7 @@ onMounted(() => {
         <div v-if="showSettings" class="absolute right-6 mt-10 w-72 bg-white border border-gray-200 shadow-lg rounded-md z-10 p-3">
           <div class="flex justify-between items-center mb-3">
             <h3 class="font-medium text-sm">对话设置</h3>
-            <button @click="toggleSettings" class="text-gray-500 hover:bg-gray-100 p-1 rounded-md">
+            <button @click="toggleSettings" class="text-gray-500 hover:bg-gray-100 p-1 rounded-md transition-colors">
               <Icon icon="material-symbols:close" class="text-base" />
             </button>
           </div>
@@ -384,7 +378,7 @@ onMounted(() => {
           </div>
 
           <div class="mt-3 pt-2 border-t border-gray-200">
-            <button class="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-md py-1.5 text-sm font-medium">
+            <button class="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-md py-1.5 text-sm font-medium transition-colors">
               应用设置
             </button>
           </div>
@@ -410,11 +404,21 @@ onMounted(() => {
         <div class="border-t border-gray-200 p-2">
           <div class="flex flex-col gap-2">
             <div class="relative">
-              <textarea v-model="messageInput" @keydown="handleKeyDown"
-                      class="w-full border border-gray-300 rounded-lg pl-3 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
-                      placeholder="给 Grove AI 发送消息..." rows="2"></textarea>
-              <button @click="sendMessage" class="absolute right-2 bottom-2 text-gray-500 hover:text-blue-500">
-                <Icon icon="material-symbols:send" />
+              <textarea
+                v-model="messageInput"
+                @keydown="handleKeyDown"
+                @input="adjustTextareaHeight"
+                class="w-full border border-gray-300 rounded-lg pl-3 pr-12 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm min-h-[40px]"
+                placeholder="给 Grove AI 发送消息..."
+                rows="2"
+              ></textarea>
+              <!-- 发送按钮 -->
+              <button
+                @click="sendMessage"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 text-gray-500 hover:text-blue-500 hover:bg-gray-100 rounded-full transition-colors"
+                :disabled="!messageInput.trim()"
+              >
+                <Icon icon="material-symbols:send" class="text-lg" />
               </button>
             </div>
             <div class="text-xs text-gray-500 flex items-center gap-1 justify-center">
@@ -483,5 +487,22 @@ onMounted(() => {
 
 ::-webkit-scrollbar-thumb:hover {
   background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* 自定义range滑块样式 */
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+}
+
+/* 禁用按钮样式 */
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>
