@@ -251,21 +251,23 @@ const switchModelSize = (size: string) => {
 </template>
 
 <style scoped>
+/* 容器基础样式 */
 .llm-container {
+  @apply bg-base-100 text-base-content;
   min-height: 100%;
   padding: 24px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 24px;
-  background: #fff;
 }
 
+/* 顶部提示样式 */
 .top-alert {
+  @apply bg-base-200/50 text-base-content border border-base-300/50;
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #F8F9FA;
   border-radius: 8px;
   padding: 12px 16px;
 }
@@ -275,8 +277,8 @@ const switchModelSize = (size: string) => {
 }
 
 .alert-text {
+  @apply text-base-content/90;
   font-size: 14px;
-  color: #1F2937;
 }
 
 .title-section {
@@ -304,13 +306,14 @@ const switchModelSize = (size: string) => {
   min-width: 0; /* 防止溢出 */
 }
 
+/* 卡片基础样式 */
 .card {
+  @apply bg-base-200/50 border-base-300/50 border;
   min-width: 0;
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
   border-radius: 12px;
   padding: 24px;
   position: relative;
+  backdrop-filter: blur(8px);
 }
 
 .card-header {
@@ -322,22 +325,22 @@ const switchModelSize = (size: string) => {
 }
 
 .card-header h2 {
+  @apply text-base-content;
   font-size: 20px;
   font-weight: 600;
-  color: #111827;
 }
 
+/* 推荐标签 */
 .recommend-badge {
-  background: #EEF2FF;
-  color: #4F46E5;
+  @apply bg-primary/20 text-primary;
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
 }
 
 .description {
+  @apply text-base-content/80;
   font-size: 14px;
-  color: #6B7280;
   margin-bottom: 24px;
 }
 
@@ -348,15 +351,15 @@ const switchModelSize = (size: string) => {
   margin-bottom: 24px;
 }
 
+/* 特性标签 */
 .feature-tag {
+  @apply bg-base-300/50 text-base-content;
   display: flex;
   align-items: center;
   gap: 4px;
   padding: 4px 8px;
-  background: #F3F4F6;
   border-radius: 4px;
   font-size: 12px;
-  color: #374151;
 }
 
 .api-providers {
@@ -365,95 +368,91 @@ const switchModelSize = (size: string) => {
   margin-bottom: 24px;
 }
 
+/* API提供商图标 */
 .provider-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
+  @apply bg-base-300/50 text-base-content hover:bg-base-100/50;
+  border-radius: 8px;
+  padding: 8px;
+  transition: all 0.2s;
 }
 
 .provider-icon {
+  @apply bg-base-100/50;
   width: 40px;
   height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #F3F4F6;
   border-radius: 8px;
 }
 
 .provider-icon img {
   width: 24px;
   height: 24px;
+  @apply opacity-90;
 }
 
 .more-icon {
-  color: #6B7280;
+  @apply text-base-content/70;
   font-size: 14px;
 }
 
 .provider-name {
+  @apply text-base-content/90;
   font-size: 12px;
-  color: #6B7280;
 }
 
+/* API密钥提示 */
 .api-key-notice {
+  @apply bg-info/20 text-info;
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #EEF2FF;
   padding: 12px;
   border-radius: 8px;
   margin-bottom: 24px;
   font-size: 14px;
-  color: #4F46E5;
 }
 
+/* 按钮样式 */
 .primary-button {
+  @apply bg-primary text-primary-content hover:bg-primary/90;
   width: 100%;
   padding: 12px;
-  background: #4F46E5;
-  color: white;
   border: none;
   border-radius: 8px;
   font-size: 14px;
   cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.primary-button:hover {
-  background: #4338CA;
+  transition: all 0.2s;
 }
 
 .secondary-button {
+  @apply bg-base-300/50 text-base-content/50;
   width: 100%;
   padding: 12px;
-  background: #F3F4F6;
-  color: #9CA3AF;
   border: none;
   border-radius: 8px;
   font-size: 14px;
   cursor: not-allowed;
 }
 
+/* 即将推出遮罩 */
 .coming-soon-mask {
+  @apply bg-base-300/90 text-primary;
   position: absolute;
   top: 24px;
   right: 24px;
-  background: #F3E8FF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 4px 8px;
   border-radius: 4px;
   font-size: 14px;
   font-weight: 600;
-  color: #7C3AED;
-  padding: 4px 8px;
   z-index: 1;
+  backdrop-filter: blur(4px);
 }
 
+/* 运行要求区域 */
 .requirements-section {
-  background: #F8F9FA;
+  @apply bg-base-300/50;
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 24px;
@@ -467,9 +466,8 @@ const switchModelSize = (size: string) => {
 }
 
 .requirements-header h3 {
+  @apply text-base-content font-semibold;
   font-size: 16px;
-  font-weight: 600;
-  color: #111827;
 }
 
 .size-tabs {
@@ -477,35 +475,32 @@ const switchModelSize = (size: string) => {
   gap: 8px;
 }
 
+/* 大小选择标签 */
 .size-tab {
+  @apply bg-base-100/50 text-base-content border-base-300/50 hover:bg-base-200/50;
   padding: 6px 12px;
-  border: 1px solid #E5E7EB;
   border-radius: 4px;
   font-size: 12px;
-  background: white;
-  color: #6B7280;
   cursor: pointer;
+  transition: all 0.2s;
 }
 
 .size-tab.active {
-  background: #4F46E5;
-  color: white;
-  border-color: #4F46E5;
+  @apply bg-primary text-primary-content border-primary;
 }
 
 .model-size {
+  @apply bg-base-200/50 text-base-content;
   display: inline-block;
   padding: 4px 8px;
-  background: #F3F4F6;
   border-radius: 4px;
   font-size: 12px;
-  color: #374151;
   margin-bottom: 8px;
 }
 
 .model-desc {
+  @apply text-base-content/80;
   font-size: 14px;
-  color: #6B7280;
   margin-bottom: 16px;
 }
 
@@ -516,43 +511,39 @@ const switchModelSize = (size: string) => {
   margin-bottom: 24px;
 }
 
+/* 用例列表 */
 .use-case {
+  @apply bg-base-100/50 text-base-content;
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 8px;
+  border-radius: 4px;
   font-size: 14px;
-  color: #374151;
 }
 
 .compatibility {
-  background: white;
+  @apply bg-base-100/50;
   border-radius: 8px;
   padding: 16px;
 }
 
 .compatibility-header {
+  @apply text-base-content;
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
   font-size: 14px;
-  color: #374151;
 }
 
-.compatibility-status {
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-}
-
+/* 兼容性状态 */
 .compatibility-status.compatible {
-  background: #DCFCE7;
-  color: #15803D;
+  @apply bg-success/20 text-success;
 }
 
 .compatibility-status.incompatible {
-  background: #FEE2E2;
-  color: #DC2626;
+  @apply bg-error/20 text-error;
 }
 
 .specs-list {
@@ -561,26 +552,29 @@ const switchModelSize = (size: string) => {
   gap: 8px;
 }
 
+/* 规格列表 */
 .spec-item {
+  @apply text-base-content;
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 14px;
-  color: #374151;
 }
 
 .spec-status {
+  @apply text-base-content/50;
   margin-left: auto;
 }
 
 .spec-status.compatible {
-  color: #15803D;
+  @apply text-success;
 }
 
+/* 即将推出提示 */
 .coming-soon-note {
+  @apply text-base-content/60;
   text-align: center;
   font-size: 14px;
-  color: #6B7280;
   font-style: italic;
   margin-top: 12px;
 }
