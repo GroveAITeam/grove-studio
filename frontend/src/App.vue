@@ -8,7 +8,7 @@ import { useRoute } from 'vue-router';
 console.log('aa')
 const menu = [
   { text: "首页", href: "/", icon: "material-symbols:home-app-logo" },
-  { text: "用户", href: "/users", icon: "material-symbols:supervisor-account-outline-rounded" },
+  { text: "对话模型", href: "/llm", icon: "material-symbols:supervisor-account-outline-rounded" },
 ]
 const activeClass = 'text-primary'
 const isNotMac = navigator.userAgent.toUpperCase().indexOf('MAC') < 0;
