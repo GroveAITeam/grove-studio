@@ -92,7 +92,7 @@ const goToApiConfig = () => {
 </script>
 
 <template>
-  <div class="bg-base-100 text-base-content p-4 flex flex-col gap-4">
+  <div class="bg-base-100 text-base-content flex flex-col gap-4">
     <!-- 顶部提示 -->
     <div class="bg-base-200/50 text-base-content border border-base-300/50 flex items-center gap-3 rounded-lg p-2">
       <div class="text-lg">💡</div>
