@@ -1,12 +1,47 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/*@custom-variant dark (&:where(.dark, .dark *));*/
+
+/* 修复滚动问题 */
+html, body {
+    @apply overflow-hidden;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
 
 @layer components {
     .input:focus {
         outline: none !important;
         border-color: hsl(var(--p) / 0.5) !important;
         --tw-ring-offset-width: 0px !important;
+    }
+}
+
+/* 自定义简洁样式 */
+@layer components {
+    /* 简洁卡片 */
+    .card-simple {
+        @apply rounded-lg bg-base-100 border border-base-300 shadow-sm;
+    }
+
+    /* 弱化的辅助文本 */
+    .text-muted {
+        @apply text-base-content/70;
+    }
+
+    /* 简洁按钮 */
+    .btn-simple {
+        @apply btn bg-primary border-0 hover:bg-primary/90 text-white;
+    }
+
+    /* 导航项 */
+    .nav-item {
+        @apply p-2 rounded-md hover:bg-base-200 transition-colors;
+    }
+
+    /* 分隔线 */
+    .divider-line {
+        @apply border-t border-base-300 my-4;
     }
 }

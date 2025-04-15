@@ -19,7 +19,7 @@ const route = useRoute();
 </script>
 
 <template>
-  <main class="flex h-screen" :data-theme="isDark ? 'dark' : 'light'">
+  <main class="flex h-screen overflow-hidden" :data-theme="isDark ? 'grovedark' : 'grovechat'">
     <nav
         class="flex-none flex flex-col justify-between w-[70px] items-center text-center select-none z-20 bg-base-200"
         style="--wails-draggable: drag"
@@ -30,7 +30,7 @@ const route = useRoute();
         </router-link>
       </div>
       <div class="menu my-4 flex flex-col gap-4 text-2xl text-base-content">
-        <button @click="toggleDark()" class="text-2xl mt-1 hover:rotate-6">
+        <button @click="toggleDark()" class="text-2xl mt-1">
           <span v-if="isDark"><Icon icon="icon-park:dark-mode" /></span>
           <span v-else><Icon icon="icon-park:sun-one" /></span>
         </button>
@@ -40,9 +40,9 @@ const route = useRoute();
       </div>
     </nav>
     <!-- 内容面板 -->
-    <div class="pl-2 w-full bg-base-100">
+    <div class="w-full bg-base-100 flex flex-col h-screen">
       <!-- windows 定制化窗口按钮 -->
-      <div v-if="isNotMac" class="flex h-10 justify-between items-center flex-0">
+      <div v-if="isNotMac" class="flex h-10 justify-between items-center flex-0 border-b border-base-200">
         <div class="px-4 text-base-content">{{ route.name }}</div>
         <div class="flex">
           <button class="btn btn-ghost btn-sm w-10 h-10" @click="WindowMinimise">
@@ -56,11 +56,11 @@ const route = useRoute();
           </button>
         </div>
       </div>
-      <div v-else class="h-8 flex items-center justify-center text-base-content" style="--wails-draggable:drag">
+      <div v-else class="h-8 flex items-center justify-center text-base-content border-b border-base-200" style="--wails-draggable:drag">
         {{ route.name }}
       </div>
       <!-- 页面内容 -->
-      <div class="overflow-y-auto h-screen p-4">
+      <div class="overflow-y-auto flex-1 py-4 px-6" style="height: calc(100vh - 40px);">
         <router-view />
       </div>
     </div>
