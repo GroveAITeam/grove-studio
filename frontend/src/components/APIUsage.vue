@@ -81,6 +81,20 @@ onMounted(() => {
 
   // 初始化图表
   initChart();
+
+  // 添加主题变化监听
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.attributeName === 'data-theme') {
+        initChart();
+      }
+    });
+  });
+
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme']
+  });
 });
 
 // 获取过去12个月
@@ -112,6 +126,11 @@ const initChart = (): void => {
   if (chart.value) {
     chart.value.destroy();
   }
+
+  // 主题适配 - 获取当前主题的文本颜色
+  const isDarkMode = document.documentElement.getAttribute('data-theme') === 'grovedark';
+  const textColor = isDarkMode ? '#fff' : '#333';
+  const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
 
   // 生成示例数据
   const dates = getLast30Days();
@@ -152,7 +171,29 @@ const initChart = (): void => {
           position: 'left',
           title: {
             display: true,
-            text: 'Token数量'
+            text: 'Token数量',
+            color: textColor
+          },
+          grid: {
+            color: gridColor
+          },
+          ticks: {
+            color: textColor
+          }
+        },
+        x: {
+          grid: {
+            color: gridColor
+          },
+          ticks: {
+            color: textColor
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          labels: {
+            color: textColor
           }
         }
       }
@@ -218,12 +259,12 @@ const generateRandomData = (count: number, min: number, max: number): number[] =
 
 <template>
   <!-- 使用统计概览 -->
-  <div class="api-section">
-    <div class="usage-stats">
+  <div class="api-section bg-base-100 shadow-sm">
+    <div class="usage-stats bg-base-200/50 rounded-lg">
       <div class="usage-header">
-        <span class="usage-title">使用概览</span>
+        <span class="usage-title text-base-content/70">使用概览</span>
         <div class="period-selector">
-          <select class="filter-select" v-model="selectedMonth">
+          <select class="filter-select text-base-content/70 hover:text-base-content" v-model="selectedMonth">
             <option v-for="month in months" :key="month.value" :value="month.value">
               {{ month.label }}
             </option>
@@ -232,20 +273,20 @@ const generateRandomData = (count: number, min: number, max: number): number[] =
       </div>
       <div class="usage-metrics">
         <div class="usage-metric">
-          <span class="metric-value">{{ totalCalls }}</span>
-          <span class="metric-label">总调用次数</span>
+          <span class="metric-value text-base-content">{{ totalCalls }}</span>
+          <span class="metric-label text-base-content/70">总调用次数</span>
         </div>
         <div class="usage-metric">
-          <span class="metric-value">{{ inputTokens }}</span>
-          <span class="metric-label">输入Token</span>
+          <span class="metric-value text-base-content">{{ inputTokens }}</span>
+          <span class="metric-label text-base-content/70">输入Token</span>
         </div>
         <div class="usage-metric">
-          <span class="metric-value">{{ outputTokens }}</span>
-          <span class="metric-label">输出Token</span>
+          <span class="metric-value text-base-content">{{ outputTokens }}</span>
+          <span class="metric-label text-base-content/70">输出Token</span>
         </div>
         <div class="usage-metric">
-          <span class="metric-value">{{ successRate }}</span>
-          <span class="metric-label">成功率</span>
+          <span class="metric-value text-base-content">{{ successRate }}</span>
+          <span class="metric-label text-base-content/70">成功率</span>
         </div>
       </div>
     </div>
@@ -254,8 +295,8 @@ const generateRandomData = (count: number, min: number, max: number): number[] =
   <!-- 筛选器 -->
   <div class="usage-filters">
     <div class="filter-group">
-      <span class="filter-label">时间范围：</span>
-      <select class="filter-select" v-model="selectedTimeRange" @change="updateData">
+      <span class="filter-label text-base-content/70">时间范围：</span>
+      <select class="filter-select bg-base-200/80 text-base-content" v-model="selectedTimeRange" @change="updateData">
         <option value="today">今天</option>
         <option value="yesterday">昨天</option>
         <option value="7days">近7天</option>
@@ -264,8 +305,8 @@ const generateRandomData = (count: number, min: number, max: number): number[] =
       </select>
     </div>
     <div class="filter-group">
-      <span class="filter-label">模型：</span>
-      <select class="filter-select" v-model="selectedModel" @change="updateData">
+      <span class="filter-label text-base-content/70">模型：</span>
+      <select class="filter-select bg-base-200/80 text-base-content" v-model="selectedModel" @change="updateData">
         <option value="all">全部模型</option>
         <option value="gpt-4">GPT-4</option>
         <option value="gpt-3.5">GPT-3.5</option>
@@ -274,8 +315,8 @@ const generateRandomData = (count: number, min: number, max: number): number[] =
       </select>
     </div>
     <div class="filter-group">
-      <span class="filter-label">状态：</span>
-      <select class="filter-select" v-model="selectedStatus" @change="updateData">
+      <span class="filter-label text-base-content/70">状态：</span>
+      <select class="filter-select bg-base-200/80 text-base-content" v-model="selectedStatus" @change="updateData">
         <option value="all">全部状态</option>
         <option value="success">成功</option>
         <option value="error">失败</option>
@@ -284,45 +325,45 @@ const generateRandomData = (count: number, min: number, max: number): number[] =
   </div>
 
   <!-- 使用趋势图表 -->
-  <div class="usage-chart">
+  <div class="usage-chart bg-base-100 shadow-sm">
     <canvas id="usageChart"></canvas>
   </div>
 
   <!-- 详细记录表格 -->
-  <div class="usage-table">
+  <div class="usage-table bg-base-100 shadow-sm">
     <div class="table-header">
-      <h3 class="table-title">调用记录</h3>
+      <h3 class="table-title text-base-content">调用记录</h3>
     </div>
     <table>
       <thead>
       <tr>
-        <th>时间</th>
-        <th>模型</th>
-        <th>请求ID</th>
-        <th>状态</th>
-        <th>响应时间</th>
-        <th>输入Token</th>
-        <th>输出Token</th>
+        <th class="text-base-content/70">时间</th>
+        <th class="text-base-content/70">模型</th>
+        <th class="text-base-content/70">请求ID</th>
+        <th class="text-base-content/70">状态</th>
+        <th class="text-base-content/70">响应时间</th>
+        <th class="text-base-content/70">输入Token</th>
+        <th class="text-base-content/70">输出Token</th>
       </tr>
       </thead>
       <tbody>
         <tr v-for="record in usageRecords" :key="record.requestId">
-          <td>{{ record.time }}</td>
-          <td>
+          <td class="text-base-content">{{ record.time }}</td>
+          <td class="text-base-content">
             <div class="model-cell">
               <img :src="`/assets/images/providers/${record.provider}.svg`" class="model-icon" :alt="record.provider">
               {{ record.model }}
             </div>
           </td>
-          <td>{{ record.requestId }}</td>
+          <td class="text-base-content">{{ record.requestId }}</td>
           <td>
             <span class="status-badge" :class="record.status === 'success' ? 'status-success' : 'status-error'">
               {{ record.status === 'success' ? '成功' : '失败' }}
             </span>
           </td>
-          <td>{{ record.responseTime }}ms</td>
-          <td>{{ record.inputTokens }}</td>
-          <td>{{ record.outputTokens }}</td>
+          <td class="text-base-content">{{ record.responseTime }}ms</td>
+          <td class="text-base-content">{{ record.inputTokens }}</td>
+          <td class="text-base-content">{{ record.outputTokens }}</td>
         </tr>
       </tbody>
     </table>
@@ -331,8 +372,6 @@ const generateRandomData = (count: number, min: number, max: number): number[] =
 
 <style scoped>
 .usage-stats {
-  background-color: #f8f9fa;
-  border-radius: 6px;
   padding: 12px;
 }
 
@@ -345,7 +384,6 @@ const generateRandomData = (count: number, min: number, max: number): number[] =
 
 .usage-title {
   font-size: 13px;
-  color: var(--text-secondary);
 }
 
 .usage-metrics {
@@ -363,19 +401,15 @@ const generateRandomData = (count: number, min: number, max: number): number[] =
 .metric-value {
   font-size: 16px;
   font-weight: 500;
-  color: var(--text-color);
 }
 
 .metric-label {
   font-size: 12px;
-  color: var(--text-secondary);
 }
 
 .api-section {
-  background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--border-color);
   padding: 20px;
   margin-bottom: 20px;
 }
@@ -395,32 +429,26 @@ const generateRandomData = (count: number, min: number, max: number): number[] =
 
 .filter-label {
   font-size: 14px;
-  color: var(--text-secondary);
 }
 
 .filter-select {
   padding: 6px 12px;
-  border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 14px;
-  color: var(--text-color);
-  background-color: white;
+  border: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .usage-chart {
-  background: white;
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 24px;
-  border: 1px solid var(--border-color);
   height: 300px;
 }
 
 .usage-table {
-  background: white;
   border-radius: 12px;
   padding: 20px;
-  border: 1px solid var(--border-color);
 }
 
 .table-header {
@@ -443,17 +471,9 @@ table {
 th, td {
   padding: 12px;
   text-align: left;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid;
+  border-color: theme('colors.base-300/20');
   font-size: 14px;
-}
-
-th {
-  color: var(--text-secondary);
-  font-weight: normal;
-}
-
-td {
-  color: var(--text-color);
 }
 
 .status-badge {
@@ -492,39 +512,7 @@ td {
   font-size: 14px;
   border: none;
   background: none;
-  color: var(--text-secondary);
   cursor: pointer;
-}
-
-.period-selector .filter-select:hover {
-  color: var(--text-color);
-}
-
-.period-selector .filter-select:focus {
-  outline: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  .usage-chart,
-  .usage-table {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
-
-  .filter-select {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
-
-  .usage-stats {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
-
-  .period-selector .filter-select {
-    color: var(--text-secondary);
-    background: none;
-  }
-
-  .period-selector .filter-select:hover {
-    color: white;
-  }
+  box-shadow: none;
 }
 </style>
