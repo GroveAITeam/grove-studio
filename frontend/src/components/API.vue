@@ -350,11 +350,6 @@ onMounted(() => {
 
 <template>
   <div class="container mx-auto px-5 max-w-6xl">
-    <header class="mb-6">
-      <h1 class="text-2xl font-semibold mb-2 text-base-content">API管理</h1>
-      <p class="text-base text-base-content/70">管理您的API密钥</p>
-    </header>
-
     <div class="bg-primary/10 rounded-lg p-4 mb-6 flex gap-4">
       <div class="text-2xl">💡</div>
       <div class="flex flex-col gap-2">
