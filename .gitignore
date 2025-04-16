@@ -6,3 +6,4 @@ frontend/dist
 # IDE - JetBrains
 .idea/
 *.iml
+grove-studio-res.syso
