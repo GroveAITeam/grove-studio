@@ -1,6 +1,11 @@
 <script lang="ts" setup>
 import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { Icon } from '@iconify/vue';
+import ConversationList from './chat/ConversationList.vue';
+import ChatHeader from './chat/ChatHeader.vue';
+import ChatMessages from './chat/ChatMessages.vue';
+import ChatInput from './chat/ChatInput.vue';
+import SettingsPanel from './chat/SettingsPanel.vue';
 
 // 类型定义
 interface Conversation {
@@ -78,8 +83,8 @@ watch(messages, () => {
 }, { deep: true })
 
 // 发送消息
-const sendMessage = () => {
-  if (!messageInput.value.trim()) return
+const sendMessage = (text: string) => {
+  if (!text.trim()) return
 
   // 获取当前时间
   const now = new Date()
@@ -88,12 +93,9 @@ const sendMessage = () => {
   // 添加用户消息
   messages.value.push({
     type: 'user',
-    content: messageInput.value,
+    content: text,
     time: timeString
   })
-
-  // 清空输入框
-  messageInput.value = ''
 
   // 滚动到底部
   setTimeout(scrollToBottom, 50)
@@ -231,47 +233,6 @@ const activeConversation = computed(() => {
   return conversations.value.find(c => c.active) || { title: '新对话' }
 })
 
-// 按Enter发送消息
-const handleKeyDown = (event: KeyboardEvent) => {
-  if (event.key === 'Enter' && !event.shiftKey) {
-    event.preventDefault()
-    sendMessage()
-  }
-}
-
-// 自动调整输入框高度
-const adjustTextareaHeight = (event: Event) => {
-  const textarea = event.target as HTMLTextAreaElement
-  textarea.style.height = 'auto'
-  textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`
-}
-
-// 格式化消息内容（支持Markdown语法）
-const formatMessage = (content: string) => {
-  if (!content) return ''
-
-  // 转换粗体
-  content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-
-  // 转换列表（简单实现）
-  content = content.replace(/^- (.*?)$/gm, '<li>$1</li>')
-  content = content.replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>')
-
-  // 转换有序列表
-  content = content.replace(/^\d+\. (.*?)$/gm, '<li>$1</li>')
-  content = content.replace(/(<li>.*?<\/li>)(?!\s*<\/ul>)/gs, '<ol>$1</ol>')
-
-  // 转换段落
-  content = content.split('\n\n').map((p: string) => {
-    if (!p.startsWith('<ul>') && !p.startsWith('<ol>')) {
-      return `<p>${p}</p>`
-    }
-    return p
-  }).join('')
-
-  return content
-}
-
 // 滚动到底部
 const scrollToBottom = () => {
   if (messagesContainer.value) {
@@ -290,122 +251,36 @@ onMounted(() => {
     <!-- 聊天界面 -->
     <div class="flex flex-1 overflow-hidden">
       <!-- 侧边栏 -->
-      <aside class="w-56 flex flex-col overflow-hidden bg-base-200/50 border-r border-base-300">
-        <div class="p-2">
-          <!-- 新对话按钮 -->
-          <button @click="createNewChat" class="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-focus text-primary-content font-medium rounded-md py-2 text-sm transition-colors">
-            <Icon icon="material-symbols:add" />
-            <span>新对话</span>
-          </button>
-        </div>
-
-        <!-- 对话列表 -->
-        <div class="overflow-y-auto flex-1 p-2">
-          <template v-for="(group, groupName) in conversations.reduce((groups: Record<string, Conversation[]>, conv) => {
-            (groups[conv.group] = groups[conv.group] || []).push(conv);
-            return groups;
-          }, {})">
-            <div class="mb-2">
-              <div class="text-xs uppercase px-2 mb-1 font-medium text-base-content/60">{{ groupName }}</div>
-              <div v-for="(conversation, index) in group" :key="conversation.id"
-                   :class="['flex items-center gap-1 px-2 py-1.5 rounded-md cursor-pointer transition-colors',
-                   conversation.active ? 'bg-primary/10 text-primary font-medium' : 'text-base-content hover:bg-base-300/30']"
-                   @click="switchConversation(conversation)">
-                <Icon icon="material-symbols:chat" class="text-base" :class="conversation.active ? 'text-primary' : 'text-base-content/70'" />
-                <span class="flex-1 truncate text-sm">{{ conversation.title }}</span>
-                <button @click="(event) => deleteConversation(conversations.indexOf(conversation), event)"
-                        class="opacity-0 group-hover:opacity-100 hover:bg-base-300 p-0.5 rounded-md transition-opacity">
-                  <Icon icon="material-symbols:close" class="text-xs text-base-content/70" />
-                </button>
-              </div>
-            </div>
-          </template>
-        </div>
-      </aside>
+      <ConversationList
+        :conversations="conversations"
+        @create-new="createNewChat"
+        @switch="switchConversation"
+        @delete="deleteConversation"
+      />
 
       <!-- 主内容区 -->
       <main class="flex-1 flex flex-col bg-base-100">
         <!-- 聊天头部 -->
-        <div class="border-b border-base-200 p-2 flex justify-between items-center bg-base-100">
-          <h2 class="text-base font-medium text-base-content">{{ activeConversation.title }}</h2>
-          <div class="flex gap-2">
-            <button @click="toggleSettings" class="p-1.5 text-base-content/70 hover:bg-base-200 rounded-md transition-colors">
-              <Icon icon="material-symbols:settings" class="text-lg" />
-            </button>
-          </div>
-        </div>
+        <ChatHeader
+          :title="activeConversation.title"
+          @toggle-settings="toggleSettings"
+        />
 
         <!-- 设置面板 -->
-        <div v-if="showSettings" class="absolute right-6 mt-10 w-72 bg-base-200 border border-base-300 shadow-lg rounded-md z-10 p-3">
-          <div class="flex justify-between items-center mb-3">
-            <h3 class="font-medium text-sm text-base-content">对话设置</h3>
-            <button @click="toggleSettings" class="text-base-content/70 hover:bg-base-300 p-1 rounded-md transition-colors">
-              <Icon icon="material-symbols:close" class="text-base" />
-            </button>
-          </div>
-
-          <div class="space-y-3">
-            <div>
-              <label class="block text-sm font-medium text-base-content mb-1">语言模型</label>
-              <select v-model="settings.model" class="w-full bg-base-100 border border-base-300 rounded-md px-2 py-1.5 text-sm text-base-content">
-                <option value="gpt-4">GPT-4（最强大）</option>
-                <option value="gpt-3.5-turbo">GPT-3.5（均衡）</option>
-                <option value="llama3">Llama 3（开源）</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-base-content mb-1">
-                回答灵活度
-                <span class="text-xs text-base-content/60">（{{Math.round(settings.temperature * 10) / 10}}）</span>
-              </label>
-              <input type="range" v-model="settings.temperature" min="0" max="1" step="0.1"
-                     class="w-full h-2 bg-base-300 rounded-lg appearance-none cursor-pointer" />
-              <div class="flex justify-between text-xs text-base-content/60 mt-1">
-                <span>精确</span>
-                <span>创造性</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <SettingsPanel
+          v-if="showSettings"
+          :settings="settings"
+          @close="toggleSettings"
+        />
 
         <!-- 消息区域 -->
-        <div ref="messagesContainer" class="flex-1 overflow-y-auto py-3 px-4 space-y-4">
-          <div v-for="(message, index) in messages" :key="index"
-               :class="['flex', message.type === 'user' ? 'justify-end' : '']">
-            <div :class="['max-w-[80%] rounded-xl p-3',
-                         message.type === 'user' ? 'bg-primary text-primary-content' : 'bg-base-200 text-base-content']">
-              <div :class="['prose prose-sm', message.typing ? 'typing' : '']" v-html="formatMessage(message.content)"></div>
-            </div>
-          </div>
-        </div>
+        <ChatMessages
+          ref="messagesContainer"
+          :messages="messages"
+        />
 
         <!-- 输入区域 -->
-        <div class="border-t border-base-200 p-2 bg-base-100">
-          <div class="flex flex-col gap-2">
-            <div class="relative">
-              <textarea
-                v-model="messageInput"
-                @keydown="handleKeyDown"
-                @input="adjustTextareaHeight"
-                class="w-full bg-base-200 border border-base-300 rounded-lg pl-3 pr-12 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-base-content placeholder:text-base-content/50 resize-none text-sm min-h-[40px]"
-                placeholder="给 Grove AI 发送消息..."
-                rows="2"
-              ></textarea>
-              <button
-                @click="sendMessage"
-                class="absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 text-base-content/70 hover:text-primary hover:bg-base-300/50 rounded-full transition-colors"
-                :disabled="!messageInput.trim()"
-              >
-                <Icon icon="material-symbols:send" class="text-lg" />
-              </button>
-            </div>
-            <div class="text-xs text-base-content/60 flex items-center gap-1 justify-center">
-              <Icon icon="material-symbols:info" class="text-sm" />
-              <span>Grove AI 可能会产生不准确的信息，请自行判断内容的准确性。</span>
-            </div>
-          </div>
-        </div>
+        <ChatInput @send="sendMessage" />
       </main>
     </div>
   </div>
