@@ -88,7 +88,7 @@
 ### 安装 wails
 
 ```shell  
-go install github.com/wailsapp/wails/v2/cmd/wails@latest```  
+go install github.com/wailsapp/wails/v2/cmd/wails@latest
 ```
 
 ### 开发  

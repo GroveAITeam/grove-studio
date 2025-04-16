@@ -1,4 +1,4 @@
-module smart-engine
+module grove-studio
 
 go 1.23
 
