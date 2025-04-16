@@ -9,5 +9,6 @@
   "author": {
     "name": "shellphy",
     "email": "ai.shellphy@gmail.com"
-  }
+  },
+  "debounceMS": 1000
 }
