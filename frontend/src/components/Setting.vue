@@ -1,17 +1,37 @@
 <script lang="ts" setup>
+import { ref } from 'vue'
+import { Icon } from '@iconify/vue'
 
+// 应用信息
+const appInfo = {
+  name: 'Grove Studio',
+  version: 'v1.0.0'
+}
+
+// 数据存储路径
+const dataPath = ref('/Users/username/Documents/GroveStudio')
+
+// AI模型默认参数
+const modelSettings = ref({
+  temperature: 0.7,
+  maxTokens: 2000
+})
+
+// 保存设置
+const saveSettings = () => {
+  // 这里可以实现实际的设置保存逻辑
+  console.log('设置已保存')
+}
 </script>
 
 <template>
-  <section class="space-y-4">
-    <div class="flex gap-4 items-center">
-      <img src="../assets/images/logo-universal.png" alt="logo" class="w-10 h-10 select-none" />
-      <h1 class="text-2xl">Wails And Vue3</h1>
-    </div>
-
-    <div class="flex items-end gap-4">
-      <p>版本：v1.0</p>
-      <p class="text-accent">有新版本</p>
+  <section class="space-y-6">
+    <!-- 保存按钮 -->
+    <div class="flex justify-end mt-6">
+      <button class="btn btn-primary" @click="saveSettings">
+        <Icon icon="material-symbols:save" class="mr-2" />
+        保存设置
+      </button>
     </div>
   </section>
 </template>
