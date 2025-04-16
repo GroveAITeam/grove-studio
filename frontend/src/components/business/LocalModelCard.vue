@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
-import ModelSizeSelector from './ModelSizeSelector.vue';
-import SystemRequirements from './SystemRequirements.vue';
+import ModelSizeSelector from '../llm/ModelSizeSelector.vue';
+import SystemRequirements from '../llm/SystemRequirements.vue';
 
 // 模型大小选项
 const modelSizes = ref([

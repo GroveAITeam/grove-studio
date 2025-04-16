@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { Icon } from '@iconify/vue';
-import ConversationList from './chat/ConversationList.vue';
-import ChatHeader from './chat/ChatHeader.vue';
-import ChatMessages from './chat/ChatMessages.vue';
-import ChatInput from './chat/ChatInput.vue';
-import SettingsPanel from './chat/SettingsPanel.vue';
+import ConversationList from '../../components/chat/ConversationList.vue';
+import ChatHeader from '../../components/chat/ChatHeader.vue';
+import ChatMessages from '../../components/chat/ChatMessages.vue';
+import ChatInput from '../../components/chat/ChatInput.vue';
+import SettingsPanel from '../../components/chat/SettingsPanel.vue';
 
 // 类型定义
 interface Conversation {

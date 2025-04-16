@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import APIIntegrationCard from './llm/APIIntegrationCard.vue';
-import LocalModelCard from './llm/LocalModelCard.vue';
+import APIIntegrationCard from '../../components/business/APIIntegrationCard.vue';
+import LocalModelCard from '../../components/business/LocalModelCard.vue';
 </script>
 
 <template>
