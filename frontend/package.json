@@ -12,6 +12,7 @@
   "dependencies": {
     "@tailwindcss/forms": "^0.5.7",
     "@vueuse/core": "^13.1.0",
+    "chart.js": "^4.4.9",
     "daisyui": "^4.6.0",
     "tailwindcss": "^3.4.1",
     "vue": "^3.2.37",

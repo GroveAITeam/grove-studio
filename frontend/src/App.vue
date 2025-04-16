@@ -5,7 +5,6 @@ import { WindowMinimise, WindowMaximise, WindowUnmaximise, Quit } from "../wails
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 
-console.log('aa')
 const menu = [
   { text: "首页", href: "/", icon: "material-symbols:home-app-logo" },
   { text: "对话模型", href: "/llm", icon: "material-symbols:supervisor-account-outline-rounded" },

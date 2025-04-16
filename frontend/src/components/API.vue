@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { Icon } from '@iconify/vue';
+import {useRouter} from "vue-router";
+
+const router = useRouter();
 
 // 类型定义
 interface ApiData {
@@ -274,10 +277,8 @@ function viewUsageStats(id: string): void {
   const api = apis.value.find(api => api.id === id);
   if (!api) return;
 
-  currentApi.value = api;
-  // 生成模拟使用数据
-  usageData.value = generateMockUsageStats();
-  showUsage.value = true;
+  // 跳转到使用统计页面，并传递API ID
+  router.push(`/api-usage?id=${id}`);
 }
 
 // 隐藏使用统计
