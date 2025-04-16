@@ -6,8 +6,8 @@ import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 const menu = [
-  { text: "首页", href: "/", icon: "material-symbols:home-app-logo" },
-  { text: "对话模型", href: "/llm", icon: "material-symbols:supervisor-account-outline-rounded" },
+  { text: "首页", href: "/", icon: "fluent:chat-24-filled" },
+  { text: "对话模型", href: "/llm", icon: "fluent:cube-24-filled" },
 ]
 const activeClass = 'text-primary'
 const isNotMac = navigator.userAgent.toUpperCase().indexOf('MAC') < 0;
@@ -30,11 +30,11 @@ const route = useRoute();
       </div>
       <div class="menu my-4 flex flex-col gap-4 text-2xl text-base-content">
         <button @click="toggleDark()" class="text-2xl mt-1">
-          <span v-if="isDark"><Icon icon="icon-park:dark-mode" /></span>
-          <span v-else><Icon icon="icon-park:sun-one" /></span>
+          <span v-if="isDark"><Icon icon="material-symbols:dark-mode-rounded" /></span>
+          <span v-else><Icon icon="material-symbols:light-mode-rounded" /></span>
         </button>
         <router-link to="/setting" v-slot="{isActive}">
-          <Icon icon="material-symbols:menu-rounded" :class="isActive && activeClass" />
+          <Icon icon="material-symbols:settings-rounded" :class="isActive && activeClass" />
         </router-link>
       </div>
     </nav>
