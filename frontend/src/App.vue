@@ -33,7 +33,7 @@ const route = useRoute();
           <span v-if="isDark"><Icon icon="icon-park:dark-mode" /></span>
           <span v-else><Icon icon="icon-park:sun-one" /></span>
         </button>
-        <router-link to="/setup" v-slot="{isActive}">
+        <router-link to="/setting" v-slot="{isActive}">
           <Icon icon="material-symbols:menu-rounded" :class="isActive && activeClass" />
         </router-link>
       </div>

@@ -8,7 +8,7 @@ const router = createRouter({
         { path: "/llm", name: '对话模型', component: () => import("./components/LLM.vue") },
         { path: "/api", name: 'API集成', component: () => import("./components/API.vue") },
         { path: "/api-usage", name: 'API使用统计', component: () => import("./components/APIUsage.vue")},
-        { path: "/setup", name: '设置', component: () => import("./components/Setup.vue") },
+        { path: "/setting", name: '设置', component: () => import("./components/Setting.vue") },
     ],
 });
 
