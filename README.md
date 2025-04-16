@@ -67,7 +67,7 @@
 - 使用自然语言快速查询信息
 - 数据不离开本地，确保信息安全
 
-### ✍️ 内容创作
+### ✍️内容创作
 
 - 撰写文章、邮件或创意内容
 - 润色和改进现有文本
@@ -89,14 +89,19 @@
 
 ```shell  
 go install github.com/wailsapp/wails/v2/cmd/wails@latest```  
-  
+```
+
 ### 开发  
   
-```shell wails dev```  
+```
+shell wails dev
+```  
   
 ### 构建  
   
-```shell make all```
+```
+shell make all
+```
 
 ## 技术架构
 
