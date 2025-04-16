@@ -2,10 +2,11 @@ package main
 
 import (
 	"embed"
+	"runtime"
+
 	"github.com/wailsapp/wails/v2/pkg/logger"
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
-	"runtime"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -42,7 +43,7 @@ func main() {
 		BackgroundColour: &options.RGBA{R: 255, G: 255, B: 255, A: 255},
 		Menu:             nil,
 		Logger:           nil,
-		LogLevel:         logger.WARNING,
+		LogLevel:         logger.DEBUG,
 		OnStartup:        app.startup,
 		OnDomReady:       app.domReady,
 		OnBeforeClose:    app.beforeClose,
