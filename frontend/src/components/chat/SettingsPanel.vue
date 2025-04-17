@@ -158,7 +158,7 @@ onMounted(async () => {
         <input type="range"
                :value="Number(settings.maxTokens)"
                @input="settings.maxTokens = Number($event.target.value)"
-               :min="500" :max="4000" :step="1167"
+               :min="500" :max="4001" :step="1167"
                class="w-full h-2 bg-base-300 rounded-lg appearance-none cursor-pointer" />
         <div class="flex justify-between text-xs text-base-content/60 mt-1">
           <span>简短</span>
