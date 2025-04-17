@@ -292,11 +292,6 @@ function changePage(newPage: number): void {
   loadModels();
 }
 
-// 查看使用统计
-function viewUsageStats(id: string): void {
-  router.push(`/llm/cloud/usage-stat?id=${id}`);
-}
-
 // 显示提示消息
 function showToast(message: string): void {
   const toast = document.createElement('div');
@@ -322,19 +317,19 @@ onMounted(() => {
 
 <template>
   <div class="container mx-auto px-5 max-w-6xl">
-    <div class="bg-warning/10 rounded-lg p-4 mb-6 flex gap-4">
-      <span class="text-2xl">🔒</span>
-      <div class="text-sm leading-relaxed">
-        <strong>隐私提示：</strong>云端模型可能会收集和存储您的数据。对于敏感数据，我们强烈推荐使用本地私有化模型，确保您的数据始终在本地处理，不经过任何外部服务器。
-      </div>
-    </div>
-
     <div class="bg-primary/10 rounded-lg p-4 mb-6 flex gap-4">
       <div class="text-2xl">💡</div>
       <div class="flex flex-col gap-2">
         <p><span class="font-semibold">云端模型</span>允许您使用第三方云服务。请前往服务商官网获取API密钥，并在此页面进行设置。
         </p>
         <p>所有API密钥均存储在您的本地设备，不会上传至 Grove 服务器，确保您的账户安全。</p>
+      </div>
+    </div>
+
+    <div class="bg-warning/10 rounded-lg p-4 mb-6 flex gap-4">
+      <span class="text-2xl">🔒</span>
+      <div class="text-sm leading-relaxed">
+        <strong>隐私提示：</strong>云端模型可能会收集和存储您的数据。对于敏感数据，我们强烈推荐使用本地私有化模型，确保您的数据始终在本地处理，不经过任何外部服务器。
       </div>
     </div>
 
@@ -386,10 +381,6 @@ onMounted(() => {
               <button class="btn btn-ghost btn-sm text-base-content/70 hover:text-error hover:bg-base-300/50"
                       @click="deleteModel(model.id)">
                 <span>删除</span>
-              </button>
-              <button class="btn btn-ghost btn-sm text-base-content/70 hover:text-base-content hover:bg-base-300/50"
-                      @click="viewUsageStats(model)">
-                <span>使用统计</span>
               </button>
             </div>
           </div>
