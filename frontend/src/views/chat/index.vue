@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, reactive, onMounted, computed, watch } from 'vue'
+import {ref, reactive, onMounted, computed, watch} from 'vue'
 import ConversationList from '../../components/chat/ConversationList.vue';
 import ChatHeader from '../../components/chat/ChatHeader.vue';
 import ChatMessages from '../../components/chat/ChatMessages.vue';

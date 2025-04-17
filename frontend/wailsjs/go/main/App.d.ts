@@ -16,8 +16,6 @@ export function GetCloudLLMModels(arg1:number,arg2:number):Promise<services.Clou
 
 export function GetSetting(arg1:string):Promise<string>;
 
-export function Greet(arg1:string):Promise<string>;
-
 export function SetSetting(arg1:string,arg2:string):Promise<void>;
 
 export function ToggleCloudLLMModelEnabled(arg1:number,arg2:boolean):Promise<void>;

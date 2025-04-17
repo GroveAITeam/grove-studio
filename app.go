@@ -109,11 +109,6 @@ func (a *App) shutdown(ctx context.Context) {
     runtime.LogInfo(ctx, "应用已关闭")
 }
 
-// Greet returns a greeting for the given name
-func (a *App) Greet(name string) string {
-    return fmt.Sprintf("你好 %s, 欢迎体验 Grove Studio!", name)
-}
-
 // GetSetting 获取设置值 (供前端调用)
 func (a *App) GetSetting(key string) (string, error) {    return a.settingService.GetSetting(key)
 }

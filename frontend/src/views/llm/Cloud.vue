@@ -9,12 +9,15 @@ import {
 } from '../../../wailsjs/go/main/App';
 import {models as modelTypes} from '../../../wailsjs/go/models';
 import {LLM_PROVIDERS, getProviderById, getProviderIcon, getProviderModels} from '../../constants/LLMProviders';
+import {useToast} from "../../utils/toast";
 
 interface FormData {
   name: string;
   apiKey: string;
   provider: string;
 }
+
+const toast = useToast();
 
 // 分页数据
 const pagination = reactive({
@@ -47,13 +50,13 @@ const availableModels = computed(() => {
   return getProviderModels(selectedProvider.value);
 });
 
-// 显示添加API表单
+// 显示添加表单
 function showAddApiForm(): void {
   showForm.value = true;
   resetForm();
 }
 
-// 隐藏添加API表单
+// 隐藏添加表单
 function hideAddApiForm(): void {
   showForm.value = false;
   resetForm();
@@ -87,10 +90,6 @@ const loadModels = () => {
   GetCloudLLMModels(pagination.page, pagination.size).then((result) => {
     modelList.value = result.items;
     pagination.total = result.total;
-  }).catch((error) => {
-    console.error('加载云端模型失败:', error);
-    showToast('加载云端模型失败');
-  }).finally(() => {
     pagination.loading = false;
   })
 }
@@ -98,7 +97,7 @@ const loadModels = () => {
 // 处理表单提交
 const handleFormSubmit = () => {
   if (!selectedProvider.value) {
-    showToast('请选择API提供商');
+    toast.warning("请选择供应商")
     return;
   }
 
@@ -117,12 +116,12 @@ const handleFormSubmit = () => {
   if (editingId.value) {
     // 更新现有API
     UpdateCloudLLMModel(modelData).then(() => {
-      showToast('API模型已更新');
+      toast.success("已更新")
     });
   } else {
     // 添加新API
     CreateCloudLLMModel(modelData).then(() => {
-      showToast('API模型已添加');
+      toast.success("已添加")
     });
   }
 
@@ -133,14 +132,11 @@ const handleFormSubmit = () => {
 
 // 删除API
 const deleteModel = (id: number) => {
-  if (confirm('确定要删除这个API模型吗？')) {
+  if (confirm('确定要删除这个模型吗？')) {
     DeleteCloudLLMModel(id).then(() => {
-      showToast('API模型已删除');
+      toast.success("已删除")
       loadModels()
-    }).then((error) => {
-      console.error('删除API模型失败:', error);
-      showToast('删除API模型失败');
-    });
+    })
   }
 }
 
@@ -160,11 +156,8 @@ function editModel(model: modelTypes.CloudLLMModel): void {
 // 切换模型启用状态
 const toggleModelEnabled = (id: number, enabled: boolean) => {
   ToggleCloudLLMModelEnabled(id, !enabled).then(() => {
-    showToast(`API模型已${!enabled ? '启用' : '禁用'}`);
+    toast.success(`API模型已${!enabled ? '启用' : '禁用'}`)
     loadModels();
-  }).catch((error) => {
-    console.error('切换API模型状态失败:', error);
-    showToast('切换API模型状态失败');
   })
 }
 
@@ -174,26 +167,9 @@ function changePage(newPage: number): void {
   loadModels();
 }
 
-// 显示提示消息
-function showToast(message: string): void {
-  const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.textContent = message;
-  document.body.appendChild(toast);
-
-  setTimeout(() => {
-    toast.classList.add('show');
-  }, 10);
-
-  setTimeout(() => {
-    toast.classList.remove('show');
-    setTimeout(() => toast.remove(), 300);
-  }, 3000);
-}
 
 // 测试模型
 function testModel(model: modelTypes.CloudLLMModel): void {
-  // TODO: 实现模型测试功能
   console.log('测试模型:', model);
 }
 

@@ -3,9 +3,15 @@ import { Icon } from '@iconify/vue';
 import { defineProps, defineEmits, computed } from 'vue';
 import { LLM_PROVIDERS } from '../../constants/LLMProviders';
 
+interface Model {
+  id: string;
+  name: string;
+  provider: string;
+}
+
 // 获取所有可用模型
 const availableModels = computed(() => {
-  const models = [];
+  const models: Model[] = [];
 
   // 从所有提供商中获取模型
   LLM_PROVIDERS.forEach(provider => {
