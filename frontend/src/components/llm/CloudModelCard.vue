@@ -4,8 +4,8 @@ import { LLM_PROVIDERS } from '../../constants/LLMProviders';
 
 const router = useRouter();
 
-// 跳转到API配置页面
-const goToApiConfig = () => {
+// 跳转到云端模型配置页面
+const goToCloudModel = () => {
   router.push('/llm/cloud');
 };
 </script>
@@ -51,7 +51,7 @@ const goToApiConfig = () => {
         <span>需要您自行提供API密钥</span>
       </div>
 
-      <button class="bg-primary text-primary-content hover:bg-primary/90 w-full py-3 border-none rounded-lg text-sm cursor-pointer transition-all duration-200" @click="goToApiConfig">开始配置</button>
+      <button class="bg-primary text-primary-content hover:bg-primary/90 w-full py-3 border-none rounded-lg text-sm cursor-pointer transition-all duration-200" @click="goToCloudModel">开始配置</button>
     </div>
   </div>
 </template>

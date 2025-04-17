@@ -260,15 +260,15 @@ onMounted(() => {
                 <input type="checkbox" class="toggle toggle-success toggle-sm"
                        :checked="model.enabled"
                        @change="toggleModelEnabled(model.id, model.enabled)" />
-                <button class="btn btn-sm bg-base-100/50 dark:bg-gray-700 text-base-content/80 dark:text-gray-300 hover:text-primary dark:hover:text-primary-300 border-base-300/10 dark:border-gray-600 hover:bg-base-100 dark:hover:bg-gray-700/80"
+                <button class="px-3 py-1 text-sm text-base-content/80 dark:text-gray-300 hover:text-primary dark:hover:text-primary-300"
                         @click="testModel(model)">
                   <span>测试</span>
                 </button>
-                <button class="btn btn-sm bg-base-100/50 dark:bg-gray-700 text-base-content/80 dark:text-gray-300 hover:text-base-content dark:hover:text-gray-100 border-base-300/10 dark:border-gray-600 hover:bg-base-100 dark:hover:bg-gray-700/80"
+                <button class="px-3 py-1 text-sm text-base-content/80 dark:text-gray-300 hover:text-base-content dark:hover:text-gray-100"
                         @click="editModel(model)">
                   <span>编辑</span>
                 </button>
-                <button class="btn btn-sm bg-base-100/50 dark:bg-gray-700 text-base-content/80 dark:text-gray-300 hover:text-error dark:hover:text-error-300 border-base-300/10 dark:border-gray-600 hover:bg-base-100 dark:hover:bg-gray-700/80"
+                <button class="px-3 py-1 text-sm text-base-content/80 dark:text-gray-300 hover:text-error dark:hover:text-error-300"
                         @click="deleteModel(model.id)">
                   <span>删除</span>
                 </button>
