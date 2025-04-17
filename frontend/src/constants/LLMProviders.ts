@@ -15,14 +15,20 @@ export const LLM_PROVIDERS: ProviderInfo[] = [
     name: 'OpenAI',
     icon: '/src/assets/images/providers/openai.png',
     endpoint: 'https://api.openai.com/v1',
-    models: ['gpt-4', 'gpt-3.5-turbo']
+    models: [
+      'gpt-4o',
+      'gpt-4o-mini',
+      'gpt-4.1',
+    ]
   },
   {
     id: 'deepseek',
     name: 'DeepSeek',
     icon: '/src/assets/images/providers/deepseek.png',
     endpoint: 'https://api.deepseek.com/v1',
-    models: ['deepseek-chat', 'deepseek-coder']
+    models: [
+      'deepseek-chat',
+    ]
   }
 ];
 
