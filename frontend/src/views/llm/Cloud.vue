@@ -322,19 +322,19 @@ onMounted(() => {
 
 <template>
   <div class="container mx-auto px-5 max-w-6xl">
-    <div class="bg-primary/10 rounded-lg p-4 mb-6 flex gap-4">
-      <div class="text-2xl">💡</div>
-      <div class="flex flex-col gap-2">
-        <p><span class="font-semibold">自定义API</span>允许您使用第三方AI服务。请前往服务商官网获取API密钥，并在此页面进行设置。
-        </p>
-        <p>所有API密钥均存储在您的本地设备，不会上传至Grove服务器，确保您的账户安全。</p>
-      </div>
-    </div>
-
     <div class="bg-warning/10 rounded-lg p-4 mb-6 flex gap-4">
       <span class="text-2xl">🔒</span>
       <div class="text-sm leading-relaxed">
-        <strong>隐私提示：</strong>第三方API服务可能会收集和存储您的数据。对于敏感数据，我们强烈推荐使用本地私有化模型，确保您的数据始终在本地处理，不经过任何外部服务器。
+        <strong>隐私提示：</strong>云端模型可能会收集和存储您的数据。对于敏感数据，我们强烈推荐使用本地私有化模型，确保您的数据始终在本地处理，不经过任何外部服务器。
+      </div>
+    </div>
+
+    <div class="bg-primary/10 rounded-lg p-4 mb-6 flex gap-4">
+      <div class="text-2xl">💡</div>
+      <div class="flex flex-col gap-2">
+        <p><span class="font-semibold">云端模型</span>允许您使用第三方云服务。请前往服务商官网获取API密钥，并在此页面进行设置。
+        </p>
+        <p>所有API密钥均存储在您的本地设备，不会上传至 Grove 服务器，确保您的账户安全。</p>
       </div>
     </div>
 
@@ -344,7 +344,7 @@ onMounted(() => {
         <!-- 添加API按钮 - 移到顶部 -->
         <button class="btn btn-primary self-start flex items-center gap-2" @click="showAddApiForm">
           <span class="text-base font-bold">+</span>
-          <span>添加新API</span>
+          <span>添加模型</span>
         </button>
 
         <!-- API列表区域 - 移除max-height和overflow-y-auto -->
