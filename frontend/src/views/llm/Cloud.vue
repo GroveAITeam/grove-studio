@@ -1,18 +1,20 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import {ref, onMounted, computed, reactive} from 'vue';
 import {useRouter} from "vue-router";
+import {
+  GetCloudLLMModels,
+  CreateCloudLLMModel,
+  UpdateCloudLLMModel,
+  DeleteCloudLLMModel,
+  ToggleCloudLLMModelEnabled
+} from '../../../wailsjs/go/main/App';
+import {models as modelTypes, services} from '../../../wailsjs/go/models';
 
 const router = useRouter();
 
-// 类型定义
-interface ApiData {
-  id: string;
-  name: string;
-  provider: string;
-  apiKey: string;
-  defaultModel: string;
-  baseUrl: string;
-}
+// 使用Wails生成的类型
+type CloudLLMModel = modelTypes.CloudLLMModel;
+type PageResult = services.CloudLLMModelPageResult;
 
 interface UsageData {
   tokensUsed: number;
@@ -38,15 +40,23 @@ interface ProviderHelp {
   [key: string]: ProviderInfo;
 }
 
+// 分页数据
+const pagination = reactive({
+  page: 1,
+  size: 10,
+  total: 0,
+  loading: false
+});
+
 // 状态管理
 const showForm = ref(false);
 const showAdvanced = ref(false);
 const showPassword = ref(false);
 const showUsage = ref(false);
 const selectedProvider = ref<string>('');
-const currentApi = ref<ApiData | null>(null);
-const editingId = ref<string | null>(null);
-const apis = ref<ApiData[]>([]);
+const currentModel = ref<CloudLLMModel | null>(null);
+const editingId = ref<number | null>(null);
+const modelList = ref<CloudLLMModel[]>([]);
 
 // 表单数据
 const formData = ref<FormData>({
@@ -66,12 +76,12 @@ const usageData = ref<UsageData>({
 
 // API提供商
 const providers = [
-  { id: 'openai', name: 'OpenAI', icon: '/assets/images/providers/openai.svg' },
-  { id: 'anthropic', name: 'Anthropic', icon: '/assets/images/providers/anthropic.svg' },
-  { id: 'google', name: 'Google AI', icon: '/assets/images/providers/google.svg' },
-  { id: 'mistral', name: 'Mistral AI', icon: '/assets/images/providers/mistral.svg' },
-  { id: 'cohere', name: 'Cohere', icon: '/assets/images/providers/cohere.svg' },
-  { id: 'azure', name: 'Azure OpenAI', icon: '/assets/images/providers/azure.svg' }
+  {id: 'openai', name: 'OpenAI', icon: '/assets/images/providers/openai.svg'},
+  {id: 'anthropic', name: 'Anthropic', icon: '/assets/images/providers/anthropic.svg'},
+  {id: 'google', name: 'Google AI', icon: '/assets/images/providers/google.svg'},
+  {id: 'mistral', name: 'Mistral AI', icon: '/assets/images/providers/mistral.svg'},
+  {id: 'cohere', name: 'Cohere', icon: '/assets/images/providers/cohere.svg'},
+  {id: 'azure', name: 'Azure OpenAI', icon: '/assets/images/providers/azure.svg'}
 ];
 
 // API提供商帮助信息
@@ -207,83 +217,116 @@ function selectProvider(providerId: string): void {
   }
 }
 
+// 加载云端模型列表
+const loadModels = () => {
+  pagination.loading = true;
+  GetCloudLLMModels(pagination.page, pagination.size).then((result) => {
+    modelList.value = result.items;
+    pagination.total = result.total;
+  }).catch((error) => {
+    console.error('加载云端模型失败:', error);
+    showToast('加载云端模型失败');
+  }).finally(() => {
+    pagination.loading = false;
+  })
+}
+
+
 // 处理表单提交
-function handleFormSubmit(): void {
+const handleFormSubmit = () => {
   if (!selectedProvider.value) {
-    alert('请选择API提供商');
+    showToast('请选择API提供商');
     return;
   }
 
-  const apiData: ApiData = {
-    id: editingId.value || crypto.randomUUID(),
-    name: formData.value.name,
-    provider: selectedProvider.value,
-    apiKey: formData.value.apiKey,
-    defaultModel: formData.value.defaultModel,
-    baseUrl: formData.value.baseUrl || ''
-  };
+  // 创建新的模型对象，使用Wails生成的模型类
+  const modelData = new modelTypes.CloudLLMModel();
+  modelData.id = editingId.value || 0;
+  modelData.name = formData.value.name;
+  modelData.provider = selectedProvider.value;
+  modelData.api_key = formData.value.apiKey;
+  modelData.endpoint = formData.value.baseUrl || '';
+  modelData.enabled = true;
 
   if (editingId.value) {
     // 更新现有API
-    const index = apis.value.findIndex(api => api.id === editingId.value);
-    if (index !== -1) {
-      apis.value[index] = apiData;
-    }
+    UpdateCloudLLMModel(modelData).then(() => {
+      showToast('API模型已更新');
+    });
   } else {
     // 添加新API
-    apis.value.push(apiData);
+    CreateCloudLLMModel(modelData).then(() => {
+      showToast('API模型已添加');
+    });
   }
 
-  // 保存到本地存储
-  saveApis();
-
-  // 关闭表单
+  // 关闭表单并刷新列表
   hideAddApiForm();
-
-  // 显示成功提示
-  showToast('API密钥已保存');
+  loadModels();
 }
 
 // 删除API
-function deleteApi(id: string): void {
-  if (confirm('确定要删除这个API密钥吗？')) {
-    apis.value = apis.value.filter(api => api.id !== id);
-    saveApis();
-    showToast('API密钥已删除');
+const deleteModel = (id: number) => {
+  if (confirm('确定要删除这个API模型吗？')) {
+    DeleteCloudLLMModel(id).then(() => {
+      showToast('API模型已删除');
+      loadModels()
+    }).then((error) => {
+      console.error('删除API模型失败:', error);
+      showToast('删除API模型失败');
+    });
   }
 }
 
 // 编辑API
-function editApi(id: string): void {
-  const api = apis.value.find(api => api.id === id);
-  if (!api) return;
-
-  editingId.value = id;
-  selectedProvider.value = api.provider;
+function editModel(model: CloudLLMModel): void {
+  editingId.value = model.id;
+  selectedProvider.value = model.provider;
   formData.value = {
-    name: api.name,
-    apiKey: api.apiKey,
-    provider: api.provider,
-    defaultModel: api.defaultModel,
-    baseUrl: api.baseUrl || ''
+    name: model.name,
+    apiKey: model.api_key,
+    provider: model.provider,
+    defaultModel: '', // 目前后端没有存储默认模型
+    baseUrl: model.endpoint || ''
   };
 
   showForm.value = true;
 }
 
-// 查看使用统计
-function viewUsageStats(id: string): void {
-  const api = apis.value.find(api => api.id === id);
-  if (!api) return;
+// 切换模型启用状态
+const toggleModelEnabled = (id: number, enabled: boolean) => {
+  ToggleCloudLLMModelEnabled(id, !enabled).then(() => {
+    showToast(`API模型已${!enabled ? '启用' : '禁用'}`);
+    loadModels();
+  }).catch((error) => {
+    console.error('切换API模型状态失败:', error);
+    showToast('切换API模型状态失败');
+  })
+}
 
-  // 跳转到使用统计页面，并传递API ID
-  router.push(`/llm/cloud/usage-stat?id=${id}`);
+// 分页控制
+function changePage(newPage: number): void {
+  pagination.page = newPage;
+  loadModels();
+}
+
+// 查看使用统计
+function viewUsageStats(model: CloudLLMModel): void {
+  currentModel.value = model;
+  showUsage.value = true;
+
+  // 模拟数据，实际项目中可能需要从后端获取
+  usageData.value = {
+    tokensUsed: 125000,
+    costEstimate: 2.5,
+    quotaPercentage: 35
+  };
 }
 
 // 隐藏使用统计
 function hideUsageStats(): void {
   showUsage.value = false;
-  currentApi.value = null;
+  currentModel.value = null;
 }
 
 // 显示提示消息
@@ -303,27 +346,9 @@ function showToast(message: string): void {
   }, 3000);
 }
 
-// 保存APIs到本地存储
-function saveApis(): void {
-  localStorage.setItem('grove_api_keys', JSON.stringify(apis.value));
-}
-
-// 从本地存储加载APIs
-function loadApis(): void {
-  const savedApis = localStorage.getItem('grove_api_keys');
-  if (savedApis) {
-    try {
-      apis.value = JSON.parse(savedApis);
-    } catch (e) {
-      console.error('无法解析保存的API数据', e);
-      apis.value = [];
-    }
-  }
-}
-
-// 组件挂载时加载APIs
+// 组件挂载时加载数据
 onMounted(() => {
-  loadApis();
+  loadModels();
 });
 </script>
 
@@ -332,7 +357,8 @@ onMounted(() => {
     <div class="bg-primary/10 rounded-lg p-4 mb-6 flex gap-4">
       <div class="text-2xl">💡</div>
       <div class="flex flex-col gap-2">
-        <p><span class="font-semibold">自定义API</span>允许您使用第三方AI服务。请前往服务商官网获取API密钥，并在此页面进行设置。</p>
+        <p><span class="font-semibold">自定义API</span>允许您使用第三方AI服务。请前往服务商官网获取API密钥，并在此页面进行设置。
+        </p>
         <p>所有API密钥均存储在您的本地设备，不会上传至Grove服务器，确保您的账户安全。</p>
       </div>
     </div>
@@ -355,32 +381,77 @@ onMounted(() => {
 
         <!-- API列表区域 - 添加最大高度和滚动 -->
         <div class="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-4">
+          <!-- 加载状态显示 -->
+          <div v-if="pagination.loading" class="flex justify-center py-10">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          </div>
+
           <!-- 空状态显示 -->
-          <div class="flex flex-col items-center justify-center py-10 px-5 bg-base-200/30 rounded-lg text-center" v-if="apis.length === 0">
+          <div class="flex flex-col items-center justify-center py-10 px-5 bg-base-200/30 rounded-lg text-center"
+               v-else-if="modelList.length === 0">
             <div class="text-3xl opacity-70 mb-4">🔑</div>
             <p class="text-base-content/70 mb-5">您还没有添加任何API密钥</p>
           </div>
 
-          <!-- API列表 -->
-          <div v-for="api in apis" :key="api.id" class="flex items-center justify-between p-4 bg-base-200/20 rounded-lg border border-base-300 transition-all hover:bg-base-200/40">
+          <!-- API模型列表 -->
+          <div v-else v-for="model in modelList" :key="model.id"
+               class="flex items-center justify-between p-4 bg-base-200/20 rounded-lg border border-base-300 transition-all hover:bg-base-200/40">
             <div class="flex items-center gap-3">
-              <img :src="getProviderIcon(api.provider)" class="w-10 h-10 object-contain" :alt="api.provider">
+              <img :src="getProviderIcon(model.provider)" class="w-10 h-10 object-contain" :alt="model.provider">
               <div class="flex flex-col">
-                <span class="font-medium text-base text-base-content">{{ api.name }}</span>
-                <span class="text-sm text-base-content/70">{{ api.provider }}</span>
+                <span class="font-medium text-base text-base-content">{{ model.name }}</span>
+                <span class="text-sm text-base-content/70">{{ model.provider }}</span>
               </div>
             </div>
-            <div class="flex gap-2">
-              <button class="btn btn-ghost btn-sm text-base-content/70 hover:text-base-content hover:bg-base-300/50" @click="editApi(api.id)">
+            <div class="flex gap-2 items-center">
+              <div class="badge badge-sm" :class="model.enabled ? 'badge-success' : 'badge-error'">
+                {{ model.enabled ? '已启用' : '已禁用' }}
+              </div>
+              <button class="btn btn-ghost btn-sm text-base-content/70 hover:text-base-content hover:bg-base-300/50"
+                      @click="toggleModelEnabled(model.id, model.enabled)">
+                <span>{{ model.enabled ? '禁用' : '启用' }}</span>
+              </button>
+              <button class="btn btn-ghost btn-sm text-base-content/70 hover:text-base-content hover:bg-base-300/50"
+                      @click="editModel(model)">
                 <span>编辑</span>
               </button>
-              <button class="btn btn-ghost btn-sm text-base-content/70 hover:text-error hover:bg-base-300/50" @click="deleteApi(api.id)">
+              <button class="btn btn-ghost btn-sm text-base-content/70 hover:text-error hover:bg-base-300/50"
+                      @click="deleteModel(model.id)">
                 <span>删除</span>
               </button>
-              <button class="btn btn-ghost btn-sm text-base-content/70 hover:text-base-content hover:bg-base-300/50" @click="viewUsageStats(api.id)">
+              <button class="btn btn-ghost btn-sm text-base-content/70 hover:text-base-content hover:bg-base-300/50"
+                      @click="viewUsageStats(model)">
                 <span>使用统计</span>
               </button>
             </div>
+          </div>
+        </div>
+
+        <!-- 分页组件 -->
+        <div v-if="!pagination.loading && pagination.total > 0" class="flex items-center justify-between my-4">
+          <div class="text-sm text-base-content/70">
+            共 {{ pagination.total }} 条记录
+          </div>
+          <div class="join">
+            <button
+              class="join-item btn btn-sm"
+              :class="pagination.page <= 1 ? 'btn-disabled' : ''"
+              @click="changePage(pagination.page - 1)"
+              :disabled="pagination.page <= 1"
+            >
+              «
+            </button>
+            <button class="join-item btn btn-sm">
+              {{ pagination.page }}
+            </button>
+            <button
+              class="join-item btn btn-sm"
+              :class="pagination.page * pagination.size >= pagination.total ? 'btn-disabled' : ''"
+              @click="changePage(pagination.page + 1)"
+              :disabled="pagination.page * pagination.size >= pagination.total"
+            >
+              »
+            </button>
           </div>
         </div>
       </div>
@@ -388,7 +459,9 @@ onMounted(() => {
       <!-- 添加/编辑API表单 弹窗 -->
       <Teleport to="body">
         <div class="fixed inset-0 bg-black/50 z-50" v-if="showForm" @click.self="hideAddApiForm"></div>
-        <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-xl shadow-lg w-[90%] max-w-[600px] max-h-[90vh] overflow-y-auto z-50" v-if="showForm">
+        <div
+          class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-xl shadow-lg w-[90%] max-w-[600px] max-h-[90vh] overflow-y-auto z-50"
+          v-if="showForm">
           <form @submit.prevent="handleFormSubmit">
             <div class="mb-5">
               <!-- API提供商选项 -->
@@ -409,15 +482,19 @@ onMounted(() => {
 
             <div class="mb-5">
               <label for="apiName" class="block mb-2 font-medium text-base-content">名称</label>
-              <input type="text" id="apiName" v-model="formData.name" required placeholder="为这个API起个名字" class="input input-bordered w-full">
+              <input type="text" id="apiName" v-model="formData.name" required placeholder="为这个API起个名字"
+                     class="input input-bordered w-full">
             </div>
 
             <div class="mb-5">
               <label for="apiKey" class="block mb-2 font-medium text-base-content">API密钥</label>
               <div class="relative flex">
-                <input :type="showPassword ? 'text' : 'password'" id="apiKey" v-model="formData.apiKey" required class="input input-bordered w-full pr-10">
-                <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center" @click="togglePasswordVisibility">
-                  <span class="text-base" :class="{ 'opacity-100': showPassword, 'opacity-50': !showPassword }">👁️</span>
+                <input :type="showPassword ? 'text' : 'password'" id="apiKey" v-model="formData.apiKey" required
+                       class="input input-bordered w-full pr-10">
+                <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center"
+                        @click="togglePasswordVisibility">
+                  <span class="text-base"
+                        :class="{ 'opacity-100': showPassword, 'opacity-50': !showPassword }">👁️</span>
                 </button>
               </div>
               <div v-if="selectedProvider && providerHelp[selectedProvider]" class="mt-3">
@@ -435,7 +512,8 @@ onMounted(() => {
             </div>
 
             <div class="mb-5">
-              <div class="flex items-center justify-between py-2 cursor-pointer text-base-content/70" @click="toggleAdvancedOptions">
+              <div class="flex items-center justify-between py-2 cursor-pointer text-base-content/70"
+                   @click="toggleAdvancedOptions">
                 <span>{{ showAdvanced ? '隐藏高级选项' : '显示高级选项' }}</span>
                 <span class="transition-transform" :class="{ 'rotate-180': showAdvanced }">▾</span>
               </div>
@@ -451,7 +529,8 @@ onMounted(() => {
 
               <div class="mb-5">
                 <label for="baseUrl" class="block mb-2 font-medium text-base-content">API基础URL</label>
-                <input type="url" id="baseUrl" v-model="formData.baseUrl" placeholder="可选，用于自定义API端点" class="input input-bordered w-full">
+                <input type="url" id="baseUrl" v-model="formData.baseUrl" placeholder="可选，用于自定义API端点"
+                       class="input input-bordered w-full">
               </div>
             </div>
 
@@ -466,10 +545,12 @@ onMounted(() => {
       <!-- 使用统计弹窗 -->
       <Teleport to="body">
         <div class="fixed inset-0 bg-black/50 z-50" v-if="showUsage" @click.self="hideUsageStats"></div>
-        <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-xl shadow-lg w-[90%] max-w-[600px] max-h-[90vh] overflow-y-auto z-50" v-if="showUsage && currentApi">
+        <div
+          class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-xl shadow-lg w-[90%] max-w-[600px] max-h-[90vh] overflow-y-auto z-50"
+          v-if="showUsage && currentModel">
           <div class="p-4">
             <div class="flex justify-between items-center mb-6">
-              <h2 class="text-lg font-semibold">{{ currentApi.name }} 使用统计</h2>
+              <h2 class="text-lg font-semibold">{{ currentModel.name }} 使用统计</h2>
               <div class="text-sm text-base-content/70">过去30天</div>
             </div>
 
@@ -530,3 +611,4 @@ onMounted(() => {
   opacity: 1;
 }
 </style>
+

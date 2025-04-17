@@ -18,9 +18,10 @@ import (
 
 // App struct
 type App struct {
-	ctx            context.Context
-	settingService *services.SettingService
-	logger         *utils.Logger
+	ctx                  context.Context
+	settingService       *services.SettingService
+	cloudLLMModelService *services.CloudLLMModelService
+	logger               *utils.Logger
 }
 
 // NewApp creates a new App application struct
@@ -34,6 +35,7 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 	a.logger = utils.NewLogger(ctx)
 	a.settingService = services.NewSettingService(ctx)
+	a.cloudLLMModelService = services.NewCloudLLMModelService(ctx)
 
 	// 获取应用数据路径
 	appDataPath, err := utils.GetAppDataPath()
@@ -125,4 +127,36 @@ func (a *App) SetSetting(key, value string) error {
 // GetAppConfig 获取应用配置 (供前端调用)
 func (a *App) GetAppConfig() (*config.AppConfig, error) {
 	return config.GetConfig(), nil
+}
+
+// ----------------------------- 云端模型相关API -----------------------------
+
+// GetCloudLLMModels 分页获取云端模型列表 (供前端调用)
+func (a *App) GetCloudLLMModels(page, size int) (*services.CloudLLMModelPageResult, error) {
+	return a.cloudLLMModelService.GetList(page, size)
+}
+
+// GetCloudLLMModelByID 获取云端模型详情 (供前端调用)
+func (a *App) GetCloudLLMModelByID(id uint) (*models.CloudLLMModel, error) {
+	return a.cloudLLMModelService.GetByID(id)
+}
+
+// CreateCloudLLMModel 创建云端模型 (供前端调用)
+func (a *App) CreateCloudLLMModel(model *models.CloudLLMModel) error {
+	return a.cloudLLMModelService.Create(model)
+}
+
+// UpdateCloudLLMModel 更新云端模型 (供前端调用)
+func (a *App) UpdateCloudLLMModel(model *models.CloudLLMModel) error {
+	return a.cloudLLMModelService.Update(model)
+}
+
+// DeleteCloudLLMModel 删除云端模型 (供前端调用)
+func (a *App) DeleteCloudLLMModel(id uint) error {
+	return a.cloudLLMModelService.Delete(id)
+}
+
+// ToggleCloudLLMModelEnabled 切换云端模型启用状态 (供前端调用)
+func (a *App) ToggleCloudLLMModelEnabled(id uint, enabled bool) error {
+	return a.cloudLLMModelService.ToggleEnabled(id, enabled)
 }
