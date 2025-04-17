@@ -5,19 +5,46 @@ import ChatHeader from '../../components/chat/ChatHeader.vue';
 import ChatMessages from '../../components/chat/ChatMessages.vue';
 import ChatInput from '../../components/chat/ChatInput.vue';
 import SettingsPanel from '../../components/chat/SettingsPanel.vue';
-import OpenAI from "openai"
+import OpenAI from "openai";
+import { GetCloudLLMModels } from '../../../wailsjs/go/main/App';
 
-const client = new OpenAI({
-  apiKey: "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",
-  dangerouslyAllowBrowser: true,
-});
-client.responses.create({
-  model: "gpt-4.1",
-  input: "你好",
-  stream: true,
-}).then((response) => {
-  console.log(response)
-})
+// OpenAI 客户端
+let client: OpenAI | null = null;
+
+// 加载可用的OpenAI API Key
+const loadOpenAIApiKey = async () => {
+  try {
+    // 从Wails后端获取云端模型信息
+    const result = await GetCloudLLMModels(1, 10);
+
+    // 查找启用的OpenAI模型
+    const openaiModel = result.items.find(model =>
+      model.provider === 'openai' && model.enabled
+    );
+
+    if (openaiModel) {
+      // 初始化OpenAI客户端
+      client = new OpenAI({
+        apiKey: openaiModel.api_key,
+        dangerouslyAllowBrowser: true,
+      });
+
+      // 更新设置中的模型
+      if (openaiModel.name) {
+        settings.model = openaiModel.name;
+      }
+
+      console.log('已成功加载OpenAI API Key');
+      return true;
+    } else {
+      console.error('找不到启用的OpenAI模型');
+      return false;
+    }
+  } catch (error) {
+    console.error('加载OpenAI API Key失败:', error);
+    return false;
+  }
+};
 
 // 类型定义
 interface Conversation {
@@ -40,41 +67,19 @@ const messagesContainer = ref<HTMLElement | null>(null)
 const conversations = ref<Conversation[]>([
   {
     id: 1,
-    title: '关于人工智能的基础知识',
+    title: '新对话',
     group: '今天',
     active: true
-  },
-  {
-    id: 2,
-    title: '深度学习模型的应用场景',
-    group: '今天',
-    active: false
-  },
-  {
-    id: 3,
-    title: 'Python编程入门指南',
-    group: '昨天',
-    active: false
-  },
-])
-
-const messages = ref<Message[]>([
-  {
-    type: 'assistant',
-    content: '你好！我是Grove AI助手，很高兴为你提供关于人工智能的基础知识。人工智能(AI)是计算机科学的一个分支，致力于开发能够执行通常需要人类智能的任务的系统。\n\n人工智能的主要类型包括：\n- **弱人工智能**：专注于执行特定任务的系统，如语音识别或自动驾驶。\n- **强人工智能**：理论上可以执行任何人类可以做的智力任务的系统。\n- **超级人工智能**：假设的系统，其能力远超人类智能。\n\n你想了解人工智能的哪个方面？',
-    time: '10:25'
-  },
-  {
-    type: 'user',
-    content: '请详细介绍一下机器学习是如何工作的？特别是深度学习模型。',
-    time: '10:27'
-  },
-  {
-    type: 'assistant',
-    content: '机器学习是人工智能的一个子领域，它专注于开发能够从数据中学习并做出预测或决策的算法，而无需被明确编程来执行特定任务。\n\n机器学习的基本工作原理是：\n\n1. **数据收集**：收集相关数据作为学习的基础。\n2. **数据预处理**：清洗、规范化和转换数据。\n3. **特征提取**：从原始数据中提取有用的特征。\n4. **模型训练**：利用算法在训练数据上学习模式。\n5. **模型评估**：使用测试数据评估模型性能。\n6. **模型部署**：将模型应用于实际问题。',
-    time: '10:28'
   }
 ])
+
+const messages = ref<Message[]>([])
+
+// 获取当前时间格式化字符串
+function getCurrentTime(): string {
+  const now = new Date();
+  return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+}
 
 // 设置面板
 const showSettings = ref(false)
@@ -94,72 +99,132 @@ watch(messages, () => {
   setTimeout(scrollToBottom, 50)
 }, { deep: true })
 
+// 发送消息到OpenAI并获取流式响应
+const sendOpenAIRequest = async (userInput: string) => {
+  // 确保客户端已初始化
+  if (!client) {
+    const success = await loadOpenAIApiKey();
+    if (!success) {
+      // 添加错误消息
+      messages.value.push({
+        type: 'assistant',
+        content: '无法连接到OpenAI，请确保已在云端模型设置中配置有效的API密钥。',
+        time: getCurrentTime()
+      });
+      return;
+    }
+  }
+
+  try {
+    // 收集历史消息作为上下文
+    const history = messages.value.slice(-settings.contextLength).map(msg => ({
+      role: msg.type,
+      content: msg.content
+    }));
+
+    // 添加当前用户消息
+    history.push({
+      role: 'user',
+      content: userInput
+    });
+
+    // 确保client不为null
+    if (!client) {
+      throw new Error('OpenAI客户端未初始化');
+    }
+
+    // 创建流式请求
+    const response = await client.chat.completions.create({
+      model: settings.model,
+      messages: history,
+      temperature: settings.temperature,
+      max_tokens: settings.maxTokens,
+      stream: true,
+    });
+
+    // 添加助手消息（带有typing标记）
+    const timeString = getCurrentTime();
+    messages.value.push({
+      type: 'assistant',
+      content: '',
+      time: timeString,
+      typing: true
+    });
+
+    // 滚动到底部
+    setTimeout(scrollToBottom, 50);
+
+    // 处理流式响应
+    for await (const chunk of response) {
+      const lastMessage = messages.value[messages.value.length - 1];
+      const content = chunk.choices[0]?.delta?.content || '';
+
+      if (content) {
+        lastMessage.content += content;
+      }
+    }
+
+    // 流式输出完成，移除typing标记
+    const lastMessage = messages.value[messages.value.length - 1];
+    lastMessage.typing = false;
+
+    // 如果是第一条消息，更新对话标题
+    if (messages.value.length === 3 && activeConversation.value.title === '新对话') {
+      // 生成标题，通常使用用户消息的前几个字
+      const userMessage = userInput.trim();
+      const title = userMessage.length > 15
+        ? userMessage.substring(0, 15) + '...'
+        : userMessage;
+
+      // 更新当前活动对话的标题
+      const activeConvIndex = conversations.value.findIndex(c => c.active);
+      if (activeConvIndex !== -1) {
+        conversations.value[activeConvIndex].title = title;
+      }
+    }
+  } catch (error) {
+    console.error('OpenAI API 调用失败:', error);
+
+    // 添加错误消息
+    const lastMessage = messages.value[messages.value.length - 1];
+    if (lastMessage.type === 'assistant' && lastMessage.typing) {
+      lastMessage.content += '\n\n[调用API时发生错误，请检查网络连接或API设置]';
+      lastMessage.typing = false;
+    } else {
+      messages.value.push({
+        type: 'assistant',
+        content: '调用API时发生错误，请检查网络连接或API设置。',
+        time: getCurrentTime(),
+      });
+    }
+  }
+};
+
 // 发送消息
-const sendMessage = (text: string) => {
-  if (!text.trim()) return
+const sendMessage = async (text: string) => {
+  if (!text.trim()) return;
 
   // 获取当前时间
-  const now = new Date()
-  const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+  const timeString = getCurrentTime();
 
   // 添加用户消息
   messages.value.push({
     type: 'user',
     content: text,
     time: timeString
-  })
+  });
 
   // 滚动到底部
-  setTimeout(scrollToBottom, 50)
+  setTimeout(scrollToBottom, 50);
 
-  // 模拟助手响应
-  setTimeout(() => {
-    const exampleResponses = [
-      "我理解你的问题了。",
-      "根据我的分析，你提到的内容涉及到几个关键点。",
-      "首先，让我们考虑一下这个问题的核心。",
-      "从技术角度来看，这是一个很好的问题。",
-      "我可以提供一些有用的信息和建议。"
-    ]
-
-    // 随机选择一个响应
-    const responseText = exampleResponses[Math.floor(Math.random() * exampleResponses.length)]
-
-    // 添加助手消息（带有typing标记）
-    messages.value.push({
-      type: 'assistant',
-      content: '',
-      time: timeString,
-      typing: true
-    })
-
-    // 滚动到底部
-    setTimeout(scrollToBottom, 50)
-
-    // 模拟流式输出
-    let index = 0
-    const interval = setInterval(() => {
-      const lastMessage = messages.value[messages.value.length - 1]
-
-      if (index < responseText.length) {
-        lastMessage.content += responseText[index]
-        index++
-      } else {
-        clearInterval(interval)
-        lastMessage.typing = false
-      }
-    }, 50)
-  }, 500)
-}
+  // 调用OpenAI API
+  await sendOpenAIRequest(text);
+};
 
 // 新建对话
 const createNewChat = () => {
   // 更新当前所有对话为非激活状态
-  conversations.value.forEach(conv => conv.active = false)
-
-  // 获取当前时间
-  const now = new Date()
-  const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+  conversations.value.forEach(conv => conv.active = false);
 
   // 创建新对话
   conversations.value.unshift({
@@ -167,95 +232,65 @@ const createNewChat = () => {
     title: '新对话',
     group: '今天',
     active: true
-  })
+  });
 
   // 清空消息
-  messages.value = [
-    {
-      type: 'assistant',
-      content: '你好！我是Grove AI助手。有什么我可以帮助你的吗？',
-      time: timeString
-    }
-  ]
-}
+  messages.value = [];
+};
 
 // 切换对话
 const switchConversation = (conversation: Conversation) => {
   conversations.value.forEach(conv => {
-    conv.active = (conv.id === conversation.id)
-  })
+    conv.active = (conv.id === conversation.id);
+  });
 
-  // 这里可以加载对应的聊天历史
-  // 示例中仅展示默认消息
-  if (conversation.title === '关于人工智能的基础知识') {
-    messages.value = [
-      {
-        type: 'assistant',
-        content: '你好！我是Grove AI助手，很高兴为你提供关于人工智能的基础知识。人工智能(AI)是计算机科学的一个分支，致力于开发能够执行通常需要人类智能的任务的系统。\n\n人工智能的主要类型包括：\n- **弱人工智能**：专注于执行特定任务的系统，如语音识别或自动驾驶。\n- **强人工智能**：理论上可以执行任何人类可以做的智力任务的系统。\n- **超级人工智能**：假设的系统，其能力远超人类智能。\n\n你想了解人工智能的哪个方面？',
-        time: '10:25'
-      },
-      {
-        type: 'user',
-        content: '请详细介绍一下机器学习是如何工作的？特别是深度学习模型。',
-        time: '10:27'
-      },
-      {
-        type: 'assistant',
-        content: '机器学习是人工智能的一个子领域，它专注于开发能够从数据中学习并做出预测或决策的算法，而无需被明确编程来执行特定任务。\n\n机器学习的基本工作原理是：\n\n1. **数据收集**：收集相关数据作为学习的基础。\n2. **数据预处理**：清洗、规范化和转换数据。\n3. **特征提取**：从原始数据中提取有用的特征。\n4. **模型训练**：利用算法在训练数据上学习模式。\n5. **模型评估**：使用测试数据评估模型性能。\n6. **模型部署**：将模型应用于实际问题。',
-        time: '10:28'
-      }
-    ]
-  } else {
-    // 其他对话只显示欢迎消息
-    const now = new Date()
-    const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+  // 这里只是切换前端对话，没有保存到数据库，所以每次切换回来都是初始状态
+  // 未来可以实现对话历史的保存和加载
+  const timeString = getCurrentTime();
 
-    messages.value = [
-      {
-        type: 'assistant',
-        content: `你好！我是Grove AI助手。这是关于"${conversation.title}"的对话。有什么我可以帮助你的吗？`,
-        time: timeString
-      }
-    ]
-  }
+  messages.value = [];
 
   // 滚动到底部
-  setTimeout(scrollToBottom, 50)
-}
+  setTimeout(scrollToBottom, 50);
+};
 
 // 删除对话
 const deleteConversation = (index: number, event: Event) => {
   // 阻止事件冒泡
-  event.stopPropagation()
+  event.stopPropagation();
 
-  const wasActive = conversations.value[index].active
-  conversations.value.splice(index, 1)
+  const wasActive = conversations.value[index].active;
+  conversations.value.splice(index, 1);
 
   // 如果删除的是当前活动对话，则激活第一个对话
   if (wasActive && conversations.value.length > 0) {
-    conversations.value[0].active = true
+    conversations.value[0].active = true;
 
     // 更新消息
-    switchConversation(conversations.value[0])
+    switchConversation(conversations.value[0]);
+  } else if (conversations.value.length === 0) {
+    // 如果没有对话了，创建一个新对话
+    createNewChat();
   }
-}
+};
 
 // 获取当前活动对话
 const activeConversation = computed(() => {
-  return conversations.value.find(c => c.active) || { title: '新对话' }
-})
+  return conversations.value.find(c => c.active) || { title: '新对话' };
+});
 
 // 滚动到底部
 const scrollToBottom = () => {
   if (messagesContainer.value) {
-    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
   }
-}
+};
 
 // 监视消息变化，自动滚动到底部
-onMounted(() => {
-  scrollToBottom()
-})
+onMounted(async () => {
+  scrollToBottom();
+  await loadOpenAIApiKey();
+});
 </script>
 
 <template>
