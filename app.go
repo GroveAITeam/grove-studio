@@ -75,7 +75,7 @@ func (a *App) startup(ctx context.Context) {
 	}
 
 	// 自动迁移数据库表结构
-	if err := database.DB.AutoMigrate(&models.Setting{}); err != nil {
+	if err := database.DB.AutoMigrate(&models.Setting{}, &models.CloudLLMModel{}); err != nil {
 		runtime.LogError(ctx, fmt.Sprintf("数据库迁移失败: %v", err))
 		return
 	}
