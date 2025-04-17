@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import {ref, onMounted, computed, reactive} from 'vue';
-import {useRouter} from "vue-router";
+import {ref, onMounted, reactive, computed} from 'vue';
 import {
   GetCloudLLMModels,
   CreateCloudLLMModel,
@@ -9,24 +8,12 @@ import {
   ToggleCloudLLMModelEnabled
 } from '../../../wailsjs/go/main/App';
 import {models as modelTypes} from '../../../wailsjs/go/models';
-const router = useRouter();
+import {LLM_PROVIDERS, getProviderById, getProviderIcon, getProviderModels} from '../../constants/LLMProviders';
 
 interface FormData {
   name: string;
   apiKey: string;
   provider: string;
-  defaultModel: string;
-  baseUrl: string;
-}
-
-interface ProviderInfo {
-  description: string;
-  helpText: string;
-  models: string[];
-}
-
-interface ProviderHelp {
-  [key: string]: ProviderInfo;
 }
 
 // 分页数据
@@ -39,9 +26,7 @@ const pagination = reactive({
 
 // 状态管理
 const showForm = ref(false);
-const showAdvanced = ref(false);
 const showPassword = ref(false);
-const showUsage = ref(false);
 const selectedProvider = ref<string>('');
 const currentModel = ref<modelTypes.CloudLLMModel | null>(null);
 const editingId = ref<number | null>(null);
@@ -51,106 +36,16 @@ const modelList = ref<modelTypes.CloudLLMModel[]>([]);
 const formData = ref<FormData>({
   name: '',
   apiKey: '',
-  provider: '',
-  defaultModel: '',
-  baseUrl: ''
+  provider: ''
 });
-
-// API提供商
-const providers = [
-  {id: 'openai', name: 'OpenAI', icon: '/assets/images/providers/openai.svg'},
-  {id: 'anthropic', name: 'Anthropic', icon: '/assets/images/providers/anthropic.svg'},
-  {id: 'google', name: 'Google AI', icon: '/assets/images/providers/google.svg'},
-  {id: 'mistral', name: 'Mistral AI', icon: '/assets/images/providers/mistral.svg'},
-  {id: 'cohere', name: 'Cohere', icon: '/assets/images/providers/cohere.svg'},
-  {id: 'azure', name: 'Azure OpenAI', icon: '/assets/images/providers/azure.svg'}
-];
-
-// API提供商帮助信息
-const providerHelp: ProviderHelp = {
-  openai: {
-    description: '使用OpenAI API访问GPT-3.5, GPT-4等模型。',
-    helpText: `
-      <ol>
-        <li>访问 <a href="https://platform.openai.com/account/api-keys" target="_blank">OpenAI API密钥页面</a></li>
-        <li>创建新的API密钥</li>
-        <li>复制API密钥并粘贴到此处</li>
-      </ol>
-    `,
-    models: ['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo']
-  },
-  anthropic: {
-    description: '使用Anthropic API访问Claude系列模型。',
-    helpText: `
-      <ol>
-        <li>访问 <a href="https://console.anthropic.com/account/keys" target="_blank">Anthropic控制台</a></li>
-        <li>创建新的API密钥</li>
-        <li>复制API密钥并粘贴到此处</li>
-      </ol>
-    `,
-    models: ['claude-3-opus', 'claude-3-sonnet', 'claude-3-haiku']
-  },
-  google: {
-    description: '使用Google AI Studio API访问Gemini系列模型。',
-    helpText: `
-      <ol>
-        <li>访问 <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a></li>
-        <li>创建新的API密钥</li>
-        <li>复制API密钥并粘贴到此处</li>
-      </ol>
-    `,
-    models: ['gemini-pro', 'gemini-ultra']
-  },
-  mistral: {
-    description: '使用Mistral AI访问Mistral系列模型。',
-    helpText: `
-      <ol>
-        <li>访问 <a href="https://console.mistral.ai/api-keys/" target="_blank">Mistral AI控制台</a></li>
-        <li>创建新的API密钥</li>
-        <li>复制API密钥并粘贴到此处</li>
-      </ol>
-    `,
-    models: ['mistral-small', 'mistral-medium', 'mistral-large']
-  },
-  cohere: {
-    description: '使用Cohere API访问Command系列模型。',
-    helpText: `
-      <ol>
-        <li>访问 <a href="https://dashboard.cohere.ai/api-keys" target="_blank">Cohere控制台</a></li>
-        <li>创建新的API密钥</li>
-        <li>复制API密钥并粘贴到此处</li>
-      </ol>
-    `,
-    models: ['command', 'command-light', 'command-r', 'command-r-plus']
-  },
-  azure: {
-    description: '使用Azure OpenAI服务访问各种OpenAI模型。',
-    helpText: `
-      <ol>
-        <li>登录到 <a href="https://portal.azure.com/" target="_blank">Azure门户</a></li>
-        <li>找到您的Azure OpenAI资源</li>
-        <li>在"密钥和终结点"部分获取密钥</li>
-        <li>复制API密钥并粘贴到此处</li>
-        <li>在高级选项中设置您的API基础URL</li>
-      </ol>
-    `,
-    models: ['gpt-4', 'gpt-35-turbo', 'dall-e-3']
-  }
-};
 
 // 根据选择的提供商获取可用模型
 const availableModels = computed(() => {
-  if (!selectedProvider.value || !providerHelp[selectedProvider.value]) {
+  if (!selectedProvider.value) {
     return [];
   }
-  return providerHelp[selectedProvider.value].models;
+  return getProviderModels(selectedProvider.value);
 });
-
-// 获取提供商图标
-function getProviderIcon(providerId: string): string {
-  const provider = providers.find(p => p.id === providerId);
-  return provider ? provider.icon : '/assets/images/providers/default.svg';
-}
 
 // 显示添加API表单
 function showAddApiForm(): void {
@@ -169,13 +64,10 @@ function resetForm(): void {
   formData.value = {
     name: '',
     apiKey: '',
-    provider: '',
-    defaultModel: '',
-    baseUrl: ''
+    provider: ''
   };
   selectedProvider.value = '';
   editingId.value = null;
-  showAdvanced.value = false;
 }
 
 // 切换密码可见性
@@ -183,20 +75,10 @@ function togglePasswordVisibility(): void {
   showPassword.value = !showPassword.value;
 }
 
-// 切换高级选项显示
-function toggleAdvancedOptions(): void {
-  showAdvanced.value = !showAdvanced.value;
-}
-
 // 选择提供商
 function selectProvider(providerId: string): void {
   selectedProvider.value = providerId;
   formData.value.provider = providerId;
-
-  // 设置默认模型
-  if (providerHelp[providerId] && providerHelp[providerId].models.length > 0) {
-    formData.value.defaultModel = providerHelp[providerId].models[0];
-  }
 }
 
 // 加载云端模型列表
@@ -213,7 +95,6 @@ const loadModels = () => {
   })
 }
 
-
 // 处理表单提交
 const handleFormSubmit = () => {
   if (!selectedProvider.value) {
@@ -227,7 +108,10 @@ const handleFormSubmit = () => {
   modelData.name = formData.value.name;
   modelData.provider = selectedProvider.value;
   modelData.api_key = formData.value.apiKey;
-  modelData.endpoint = formData.value.baseUrl || '';
+
+  // 从常量设置endpoint
+  const provider = getProviderById(selectedProvider.value);
+  modelData.endpoint = provider ? provider.endpoint : '';
   modelData.enabled = true;
 
   if (editingId.value) {
@@ -267,9 +151,7 @@ function editModel(model: modelTypes.CloudLLMModel): void {
   formData.value = {
     name: model.name,
     apiKey: model.api_key,
-    provider: model.provider,
-    defaultModel: '', // 目前后端没有存储默认模型
-    baseUrl: model.endpoint || ''
+    provider: model.provider
   };
 
   showForm.value = true;
@@ -309,6 +191,12 @@ function showToast(message: string): void {
   }, 3000);
 }
 
+// 测试模型
+function testModel(model: modelTypes.CloudLLMModel): void {
+  // TODO: 实现模型测试功能
+  console.log('测试模型:', model);
+}
+
 // 组件挂载时加载数据
 onMounted(() => {
   loadModels();
@@ -342,8 +230,8 @@ onMounted(() => {
           <span>添加模型</span>
         </button>
 
-        <!-- API列表区域 - 移除max-height和overflow-y-auto -->
-        <div class="flex flex-col gap-3 pr-4">
+        <!-- API列表区域 -->
+        <div class="flex flex-col gap-3">
           <!-- 加载状态显示 -->
           <div v-if="pagination.loading" class="flex justify-center py-10">
             <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
@@ -366,13 +254,13 @@ onMounted(() => {
                 <span class="text-sm text-base-content/70">{{ model.provider }}</span>
               </div>
             </div>
-            <div class="flex gap-2 items-center">
-              <div class="badge badge-sm" :class="model.enabled ? 'badge-success' : 'badge-error'">
-                {{ model.enabled ? '已启用' : '已禁用' }}
-              </div>
-              <button class="btn btn-ghost btn-sm text-base-content/70 hover:text-base-content hover:bg-base-300/50"
-                      @click="toggleModelEnabled(model.id, model.enabled)">
-                <span>{{ model.enabled ? '禁用' : '启用' }}</span>
+            <div class="flex gap-4 items-center">
+              <input type="checkbox" class="toggle toggle-success"
+                     :checked="model.enabled"
+                     @change="toggleModelEnabled(model.id, model.enabled)" />
+              <button class="btn btn-ghost btn-sm text-base-content/70 hover:text-primary hover:bg-base-300/50"
+                      @click="testModel(model)">
+                <span>测试</span>
               </button>
               <button class="btn btn-ghost btn-sm text-base-content/70 hover:text-base-content hover:bg-base-300/50"
                       @click="editModel(model)">
@@ -387,7 +275,8 @@ onMounted(() => {
         </div>
 
         <!-- 分页组件 -->
-        <div v-if="!pagination.loading && pagination.total > 0" class="flex items-center justify-between my-4">
+        <div v-if="!pagination.loading && pagination.total > pagination.size"
+             class="flex items-center justify-between mt-4">
           <div class="text-sm text-base-content/70">
             共 {{ pagination.total }} 条记录
           </div>
@@ -413,6 +302,7 @@ onMounted(() => {
             </button>
           </div>
         </div>
+
       </div>
 
       <!-- 添加/编辑API表单 弹窗 -->
@@ -424,9 +314,9 @@ onMounted(() => {
           <form @submit.prevent="handleFormSubmit">
             <div class="mb-5">
               <!-- API提供商选项 -->
-              <div class="grid grid-cols-3 gap-3 mb-4 md:grid-cols-3 sm:grid-cols-2">
+              <div class="grid grid-cols-2 gap-3 mb-4">
                 <div
-                  v-for="provider in providers"
+                  v-for="provider in LLM_PROVIDERS"
                   :key="provider.id"
                   class="flex flex-col items-center gap-2 p-4 border border-base-300 rounded-lg cursor-pointer transition-all hover:bg-base-200/20"
                   :class="{ 'border-primary bg-primary/5': selectedProvider === provider.id }"
@@ -456,40 +346,8 @@ onMounted(() => {
                         :class="{ 'opacity-100': showPassword, 'opacity-50': !showPassword }">👁️</span>
                 </button>
               </div>
-              <div v-if="selectedProvider && providerHelp[selectedProvider]" class="mt-3">
-                <div class="border border-base-300 rounded-lg overflow-hidden">
-                  <div class="flex items-center gap-2 p-3 bg-base-200/20 border-b border-base-300">
-                    <span class="text-base">ℹ️</span>
-                    <span class="font-medium text-sm">如何获取API密钥</span>
-                  </div>
-                  <div class="p-3">
-                    <p class="text-sm">{{ providerHelp[selectedProvider].description }}</p>
-                    <div class="mt-3 text-sm" v-html="providerHelp[selectedProvider].helpText"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="mb-5">
-              <div class="flex items-center justify-between py-2 cursor-pointer text-base-content/70"
-                   @click="toggleAdvancedOptions">
-                <span>{{ showAdvanced ? '隐藏高级选项' : '显示高级选项' }}</span>
-                <span class="transition-transform" :class="{ 'rotate-180': showAdvanced }">▾</span>
-              </div>
-            </div>
-
-            <div v-if="showAdvanced" class="border-t border-base-300 pt-4 mt-4">
-              <div class="mb-5">
-                <label for="defaultModel" class="block mb-2 font-medium text-base-content">默认模型</label>
-                <select id="defaultModel" v-model="formData.defaultModel" class="select select-bordered w-full">
-                  <option v-for="model in availableModels" :key="model" :value="model">{{ model }}</option>
-                </select>
-              </div>
-
-              <div class="mb-5">
-                <label for="baseUrl" class="block mb-2 font-medium text-base-content">API基础URL</label>
-                <input type="url" id="baseUrl" v-model="formData.baseUrl" placeholder="可选，用于自定义API端点"
-                       class="input input-bordered w-full">
+              <div v-if="selectedProvider && getProviderById(selectedProvider)" class="mt-3">
+                <p class="text-sm text-base-content/70">{{ getProviderById(selectedProvider)?.description }}</p>
               </div>
             </div>
 

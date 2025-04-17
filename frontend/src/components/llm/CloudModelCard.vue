@@ -1,18 +1,8 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import OpenAIIcon from '../../assets/icons/placeholder-openai.svg';
-import ClaudeIcon from '../../assets/icons/placeholder-claude.svg';
-import GeminiIcon from '../../assets/icons/placeholder-gemini.svg';
+import { LLM_PROVIDERS } from '../../constants/LLMProviders';
 
 const router = useRouter();
-
-// API提供商列表
-const apiProviders = ref([
-  { name: 'OpenAI', icon: OpenAIIcon },
-  { name: 'Claude', icon: ClaudeIcon },
-  { name: 'Gemini', icon: GeminiIcon }
-]);
 
 // 跳转到API配置页面
 const goToApiConfig = () => {
@@ -47,17 +37,11 @@ const goToApiConfig = () => {
 
       <!-- API提供商图标 -->
       <div class="flex gap-4 mb-6">
-        <div v-for="provider in apiProviders" :key="provider.name" class="bg-base-300/50 text-base-content hover:bg-base-100/50 rounded-lg p-2 transition-all duration-200">
+        <div v-for="provider in LLM_PROVIDERS" :key="provider.id" class="bg-base-300/50 text-base-content hover:bg-base-100/50 rounded-lg p-2 transition-all duration-200">
           <div class="bg-base-100/50 w-10 h-10 flex items-center justify-center rounded-lg">
             <img :src="provider.icon" :alt="provider.name" class="w-6 h-6 opacity-90">
           </div>
           <span class="text-base-content/90 text-xs">{{ provider.name }}</span>
-        </div>
-        <div class="bg-base-300/50 text-base-content hover:bg-base-100/50 rounded-lg p-2 transition-all duration-200">
-          <div class="bg-base-100/50 w-10 h-10 flex items-center justify-center rounded-lg text-base-content/70 text-sm">
-            <span>+9</span>
-          </div>
-          <span class="text-base-content/90 text-xs">更多</span>
         </div>
       </div>
 
