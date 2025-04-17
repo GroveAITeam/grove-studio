@@ -16,7 +16,7 @@ const apiProviders = ref([
 
 // 跳转到API配置页面
 const goToApiConfig = () => {
-  router.push('/api');
+  router.push('/llm/cloud');
 };
 </script>
 

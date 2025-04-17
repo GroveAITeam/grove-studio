@@ -277,7 +277,7 @@ function viewUsageStats(id: string): void {
   if (!api) return;
 
   // 跳转到使用统计页面，并传递API ID
-  router.push(`/api-usage?id=${id}`);
+  router.push(`/llm/cloud/usage-stat?id=${id}`);
 }
 
 // 隐藏使用统计

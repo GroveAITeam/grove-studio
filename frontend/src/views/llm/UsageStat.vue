@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import UsageOverview from '../../components/business/api/UsageOverview.vue';
-import UsageFilters from '../../components/business/api/UsageFilters.vue';
-import UsageChart from '../../components/business/api/UsageChart.vue';
-import UsageTable from '../../components/business/api/UsageTable.vue';
+import UsageOverview from '../../components/usage_stats/UsageOverview.vue';
+import UsageFilters from '../../components/usage_stats/UsageFilters.vue';
+import UsageChart from '../../components/usage_stats/UsageChart.vue';
+import UsageTable from '../../components/usage_stats/UsageTable.vue';
 
 // 类型定义
 interface ApiData {

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import APIIntegrationCard from '../../components/business/APIIntegrationCard.vue';
-import LocalModelCard from '../../components/business/LocalModelCard.vue';
+import CloudModelCard from '../../components/llm/CloudModelCard.vue';
+import LocalModelCard from '../../components/llm/LocalModelCard.vue';
 </script>
 
 <template>
@@ -13,12 +13,11 @@ import LocalModelCard from '../../components/business/LocalModelCard.vue';
 
     <!-- 卡片区域 -->
     <div class="grid grid-cols-2 gap-4 flex-1 min-w-0">
-      <APIIntegrationCard />
+      <CloudModelCard />
       <LocalModelCard />
     </div>
   </div>
 </template>
 
 <style scoped>
-/* 所有样式已转换为Tailwind类，不再需要scoped CSS */
 </style>
