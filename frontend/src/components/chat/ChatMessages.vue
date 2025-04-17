@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { defineProps, ref, watchEffect, nextTick } from 'vue';
+import { defineProps, defineExpose, ref } from 'vue';
 
 interface Message {
   type: 'user' | 'assistant';
@@ -13,41 +13,21 @@ const props = defineProps<{
 
 const messagesContainer = ref<HTMLElement | null>(null);
 
-// 滚动到底部
-const scrollToBottom = async () => {
-  await nextTick();
-  if (messagesContainer.value) {
-    const container = messagesContainer.value;
-    container.scrollTop = container.scrollHeight;
-  }
-};
-
-// 监听消息变化自动滚动
-watchEffect(() => {
-  if (props.messages.length) {
-    // 使用两次延时确保在所有内容都渲染完成后滚动
-    setTimeout(() => {
-      scrollToBottom();
-      // 再次滚动以确保捕获所有更新
-      setTimeout(scrollToBottom, 100);
-    }, 50);
-  }
+// 暴露容器引用，使父组件可以操作
+defineExpose({
+  messagesContainer
 });
 </script>
 
 <template>
-  <div class="flex-1 overflow-y-auto relative" ref="messagesContainer">
-    <div class="px-4 py-4 space-y-6">
-      <div v-for="(message, index) in messages" :key="index"
-           :class="['flex', message.type === 'user' ? 'justify-end' : '']">
-        <div :class="['max-w-[80%] rounded-xl p-3 relative',
-                    message.type === 'user' ? 'bg-primary text-primary-content' : 'bg-base-200 text-base-content']">
-          <div :class="['prose prose-sm', message.typing ? 'typing' : '']" v-html="message.content"></div>
-        </div>
+  <div class="flex-1 overflow-y-auto py-3 px-4 space-y-4" ref="messagesContainer">
+    <div v-for="(message, index) in messages" :key="index"
+         :class="['flex', message.type === 'user' ? 'justify-end' : '']">
+      <div :class="['max-w-[80%] rounded-xl p-3 relative',
+                  message.type === 'user' ? 'bg-primary text-primary-content' : 'bg-base-200 text-base-content']">
+        <div :class="['prose prose-sm', message.typing ? 'typing' : '']" v-html="message.content"></div>
       </div>
     </div>
-    <!-- 底部填充，确保最后一条消息不被输入框遮挡 -->
-    <div class="h-20"></div>
   </div>
 </template>
 
@@ -78,24 +58,5 @@ watchEffect(() => {
 @keyframes cursor-blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
-}
-
-/* 滚动容器样式 */
-.overflow-y-auto {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
-}
-
-.overflow-y-auto::-webkit-scrollbar {
-  width: 4px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
 }
 </style>

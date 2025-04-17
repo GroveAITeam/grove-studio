@@ -6,9 +6,9 @@ import ChatMessages from '../../components/chat/ChatMessages.vue';
 import ChatInput from '../../components/chat/ChatInput.vue';
 import SettingsPanel from '../../components/chat/SettingsPanel.vue';
 import OpenAI from "openai";
-import {GetCloudLLMModels, SetSetting, GetSetting} from '../../../wailsjs/go/main/App';
+import {GetCloudLLMModels} from '../../../wailsjs/go/main/App';
 import {useToast} from "../../utils/toast";
-import {LLM_PROVIDERS, getProviderById} from '../../constants/LLMProviders';
+import {LLM_PROVIDERS} from '../../constants/LLMProviders';
 
 const toast = useToast();
 let client: OpenAI | null = null;
@@ -75,8 +75,7 @@ interface Message {
 }
 
 // 聊天相关功能
-const messageInput = ref('')
-const messagesContainer = ref<HTMLElement | null>(null)
+const chatMessagesComponent = ref<any>(null)
 const conversations = ref<Conversation[]>([
   {
     id: 1,
@@ -87,12 +86,6 @@ const conversations = ref<Conversation[]>([
 ])
 
 const messages = ref<Message[]>([])
-
-// 获取当前时间格式化字符串
-function getCurrentTime(): string {
-  const now = new Date();
-  return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-}
 
 // 设置面板
 const showSettings = ref(false)
@@ -150,10 +143,15 @@ const handleClickOutside = (event: MouseEvent) => {
   }
 }
 
-// 监听消息变化自动滚动
-watch(messages, () => {
-  setTimeout(scrollToBottom, 50)
-}, {deep: true})
+// 滚动到底部
+const scrollToBottom = async () => {
+  // 使用nextTick确保DOM已更新
+  await nextTick();
+  if (chatMessagesComponent.value?.messagesContainer) {
+    chatMessagesComponent.value.messagesContainer.scrollTop =
+      chatMessagesComponent.value.messagesContainer.scrollHeight;
+  }
+};
 
 // 发送消息到OpenAI并获取流式响应
 const sendOpenAIRequest = async (userInput: string) => {
@@ -230,8 +228,8 @@ const sendOpenAIRequest = async (userInput: string) => {
       typing: true
     });
 
-    // 滚动到底部
-    scrollToBottom();
+    // 确保消息添加后滚动到底部
+    await scrollToBottom();
 
     // 处理流式响应
     for await (const chunk of streamResponse as any) {
@@ -240,8 +238,10 @@ const sendOpenAIRequest = async (userInput: string) => {
 
       if (content) {
         lastMessage.content += content;
-        // 每个chunk后滚动到底部
-        scrollToBottom();
+        // 添加内容后定期滚动到底部
+        if (lastMessage.content.length % 10 === 0) {
+          await scrollToBottom();
+        }
       }
     }
 
@@ -250,7 +250,7 @@ const sendOpenAIRequest = async (userInput: string) => {
     lastMessage.typing = false;
 
     // 确保结束后再次滚动到底部
-    scrollToBottom();
+    await scrollToBottom();
 
     // 如果是第一条消息，更新对话标题
     if (messages.value.length === 3 && activeConversation.value.title === '新对话') {
@@ -267,7 +267,6 @@ const sendOpenAIRequest = async (userInput: string) => {
       }
     }
   } catch (error) {
-    console.error('OpenAI请求失败:', error);
     toast.error('发送请求失败，请稍后重试');
 
     // 移除typing消息
@@ -287,6 +286,9 @@ const sendMessage = async (text: string) => {
     type: 'user',
     content: text,
   });
+
+  // 确保消息添加后滚动到底部
+  await scrollToBottom();
 
   // 调用OpenAI API
   await sendOpenAIRequest(text);
@@ -344,20 +346,18 @@ const activeConversation = computed(() => {
   return conversations.value.find(c => c.active) || {title: '新对话'};
 });
 
-// 滚动到底部
-const scrollToBottom = () => {
-  if (messagesContainer.value) {
-    nextTick(() => {
-      if (messagesContainer.value) {
-        messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
-      }
-    });
-  }
-};
+// 监听消息变化自动滚动 - 使用更可靠的实现
+watch(messages, async () => {
+  await scrollToBottom();
+}, {deep: true});
 
-// 添加和移除点击事件监听器
+// 初始化
 onMounted(async () => {
+  await scrollToBottom();
   await loadOpenAIApiKey();
+
+  // 添加窗口大小变化时的滚动处理
+  window.addEventListener('resize', scrollToBottom);
 });
 </script>
 
@@ -391,17 +391,13 @@ onMounted(async () => {
         />
 
         <!-- 消息区域 -->
-        <div class="flex-1 flex flex-col overflow-hidden">
-          <ChatMessages
-            ref="messagesContainer"
-            :messages="messages"
-          />
+        <ChatMessages
+          ref="chatMessagesComponent"
+          :messages="messages"
+        />
 
-          <!-- 输入区域 -->
-          <div class="p-4 bg-base-100">
-            <ChatInput @send="sendMessage"/>
-          </div>
-        </div>
+        <!-- 输入区域 -->
+        <ChatInput @send="sendMessage"/>
       </main>
     </div>
   </div>

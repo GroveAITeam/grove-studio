@@ -104,8 +104,21 @@ const responseLength = computed(() => {
   return '完整';
 });
 
-// 对应长度的滑块值
-const lengthLabels = ['简短', '适中', '详细', '完整'];
+// 修正输入事件类型处理
+const handleTemperatureChange = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  props.settings.temperature = Number(target.value);
+};
+
+const handleMaxTokensChange = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  props.settings.maxTokens = Number(target.value);
+};
+
+const handleContextLengthChange = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  props.settings.contextLength = Number(target.value);
+};
 
 // 初始化
 onMounted(async () => {
@@ -126,7 +139,7 @@ onMounted(async () => {
       <div>
         <label class="block text-sm font-medium text-base-content mb-1">语言模型</label>
         <select v-model="settings.model" class="w-full bg-base-100 border border-base-300 rounded-md px-2 py-1.5 text-sm text-base-content">
-          <optgroup v-for="(models, groupName) in modelGroups" :key="groupName" :label="groupName">
+          <optgroup v-for="(models, groupName) in modelGroups" :key="String(groupName)" :label="String(groupName)">
             <option v-for="model in models" :key="model.id" :value="model.id">
               {{ model.name }} ({{ model.provider }})
             </option>
@@ -141,7 +154,7 @@ onMounted(async () => {
         </label>
         <input type="range"
                :value="Number(settings.temperature)"
-               @input="settings.temperature = Number($event.target.value)"
+               @input="handleTemperatureChange"
                min="0" max="1" step="0.1"
                class="w-full h-2 bg-base-300 rounded-lg appearance-none cursor-pointer" />
         <div class="flex justify-between text-xs text-base-content/60 mt-1">
@@ -157,7 +170,7 @@ onMounted(async () => {
         </label>
         <input type="range"
                :value="Number(settings.maxTokens)"
-               @input="settings.maxTokens = Number($event.target.value)"
+               @input="handleMaxTokensChange"
                :min="500" :max="4001" :step="1167"
                class="w-full h-2 bg-base-300 rounded-lg appearance-none cursor-pointer" />
         <div class="flex justify-between text-xs text-base-content/60 mt-1">
@@ -176,7 +189,7 @@ onMounted(async () => {
         </label>
         <input type="range"
                :value="Number(settings.contextLength)"
-               @input="settings.contextLength = Number($event.target.value)"
+               @input="handleContextLengthChange"
                :min="1" :max="20" step="1"
                class="w-full h-2 bg-base-300 rounded-lg appearance-none cursor-pointer" />
         <div class="flex justify-between text-xs text-base-content/60 mt-1">
