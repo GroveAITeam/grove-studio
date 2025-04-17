@@ -1,8 +1,8 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHashHistory } from "vue-router";
 import Chat from "../views/chat/index.vue";
 
 const router = createRouter({
-    history: createWebHistory(),
+    history: createWebHashHistory(),
     routes: [
         { path: "/", name: "Grove Studio", component: Chat },
         { path: "/llm", name: '对话模型', component: () => import("../views/llm/LLM.vue") },

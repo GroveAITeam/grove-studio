@@ -8,19 +8,8 @@ import {
   DeleteCloudLLMModel,
   ToggleCloudLLMModelEnabled
 } from '../../../wailsjs/go/main/App';
-import {models as modelTypes, services} from '../../../wailsjs/go/models';
-
+import {models as modelTypes} from '../../../wailsjs/go/models';
 const router = useRouter();
-
-// 使用Wails生成的类型
-type CloudLLMModel = modelTypes.CloudLLMModel;
-type PageResult = services.CloudLLMModelPageResult;
-
-interface UsageData {
-  tokensUsed: number;
-  costEstimate: number;
-  quotaPercentage: number;
-}
 
 interface FormData {
   name: string;
@@ -54,9 +43,9 @@ const showAdvanced = ref(false);
 const showPassword = ref(false);
 const showUsage = ref(false);
 const selectedProvider = ref<string>('');
-const currentModel = ref<CloudLLMModel | null>(null);
+const currentModel = ref<modelTypes.CloudLLMModel | null>(null);
 const editingId = ref<number | null>(null);
-const modelList = ref<CloudLLMModel[]>([]);
+const modelList = ref<modelTypes.CloudLLMModel[]>([]);
 
 // 表单数据
 const formData = ref<FormData>({
@@ -65,13 +54,6 @@ const formData = ref<FormData>({
   provider: '',
   defaultModel: '',
   baseUrl: ''
-});
-
-// 使用统计数据
-const usageData = ref<UsageData>({
-  tokensUsed: 0,
-  costEstimate: 0,
-  quotaPercentage: 0
 });
 
 // API提供商
@@ -279,7 +261,7 @@ const deleteModel = (id: number) => {
 }
 
 // 编辑API
-function editModel(model: CloudLLMModel): void {
+function editModel(model: modelTypes.CloudLLMModel): void {
   editingId.value = model.id;
   selectedProvider.value = model.provider;
   formData.value = {
@@ -311,22 +293,8 @@ function changePage(newPage: number): void {
 }
 
 // 查看使用统计
-function viewUsageStats(model: CloudLLMModel): void {
-  currentModel.value = model;
-  showUsage.value = true;
-
-  // 模拟数据，实际项目中可能需要从后端获取
-  usageData.value = {
-    tokensUsed: 125000,
-    costEstimate: 2.5,
-    quotaPercentage: 35
-  };
-}
-
-// 隐藏使用统计
-function hideUsageStats(): void {
-  showUsage.value = false;
-  currentModel.value = null;
+function viewUsageStats(id: string): void {
+  router.push(`/llm/cloud/usage-stat?id=${id}`);
 }
 
 // 显示提示消息
@@ -379,8 +347,8 @@ onMounted(() => {
           <span>添加新API</span>
         </button>
 
-        <!-- API列表区域 - 添加最大高度和滚动 -->
-        <div class="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-4">
+        <!-- API列表区域 - 移除max-height和overflow-y-auto -->
+        <div class="flex flex-col gap-3 pr-4">
           <!-- 加载状态显示 -->
           <div v-if="pagination.loading" class="flex justify-center py-10">
             <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
@@ -541,74 +509,10 @@ onMounted(() => {
           </form>
         </div>
       </Teleport>
-
-      <!-- 使用统计弹窗 -->
-      <Teleport to="body">
-        <div class="fixed inset-0 bg-black/50 z-50" v-if="showUsage" @click.self="hideUsageStats"></div>
-        <div
-          class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-xl shadow-lg w-[90%] max-w-[600px] max-h-[90vh] overflow-y-auto z-50"
-          v-if="showUsage && currentModel">
-          <div class="p-4">
-            <div class="flex justify-between items-center mb-6">
-              <h2 class="text-lg font-semibold">{{ currentModel.name }} 使用统计</h2>
-              <div class="text-sm text-base-content/70">过去30天</div>
-            </div>
-
-            <div class="flex gap-6 mb-6">
-              <div class="flex-1 flex flex-col items-center bg-base-200/20 rounded-lg p-4">
-                <div class="text-2xl font-semibold mb-1">{{ usageData.tokensUsed.toLocaleString() }}</div>
-                <div class="text-sm text-base-content/70">令牌使用量</div>
-              </div>
-              <div class="flex-1 flex flex-col items-center bg-base-200/20 rounded-lg p-4">
-                <div class="text-2xl font-semibold mb-1">${{ usageData.costEstimate.toFixed(2) }}</div>
-                <div class="text-sm text-base-content/70">估计费用</div>
-              </div>
-            </div>
-
-            <div class="mb-6">
-              <div class="flex justify-between mb-2 text-sm">配额使用：{{ usageData.quotaPercentage }}%</div>
-              <div class="h-2 bg-base-200/50 rounded-full overflow-hidden">
-                <div
-                  class="h-full rounded-full transition-all"
-                  :class="{
-                    'bg-primary': usageData.quotaPercentage <= 70,
-                    'bg-warning': usageData.quotaPercentage > 70 && usageData.quotaPercentage <= 90,
-                    'bg-error': usageData.quotaPercentage > 90
-                  }"
-                  :style="{ width: usageData.quotaPercentage + '%' }"
-                ></div>
-              </div>
-            </div>
-
-            <div class="flex justify-end">
-              <button type="button" class="btn btn-outline" @click="hideUsageStats">关闭</button>
-            </div>
-          </div>
-        </div>
-      </Teleport>
     </main>
   </div>
 </template>
 
 <style scoped>
-:global(.toast) {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background-color: #333;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 14px;
-  z-index: 1010;
-  opacity: 0;
-  transition: transform 0.3s, opacity 0.3s;
-}
-
-:global(.toast.show) {
-  transform: translateX(-50%) translateY(0);
-  opacity: 1;
-}
 </style>
 
