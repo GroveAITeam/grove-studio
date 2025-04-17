@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {ref, reactive, onMounted, computed, watch} from 'vue'
+import {ref, reactive, onMounted, computed, watch, nextTick} from 'vue'
 import ConversationList from '../../components/chat/ConversationList.vue';
 import ChatHeader from '../../components/chat/ChatHeader.vue';
 import ChatMessages from '../../components/chat/ChatMessages.vue';
@@ -129,7 +129,7 @@ const saveSettings = () => {
 // 监听设置变化，自动保存
 watch(settings, () => {
   saveSettings();
-}, { deep: true });
+}, {deep: true});
 
 const toggleSettings = () => {
   showSettings.value = !showSettings.value
@@ -143,9 +143,9 @@ const handleClickOutside = (event: MouseEvent) => {
 
   // 如果点击的不是设置面板内的元素，也不是触发按钮，则关闭面板
   if (settingsPanel &&
-      !settingsPanel.contains(event.target as Node) &&
-      settingsButton &&
-      !settingsButton.contains(event.target as Node)) {
+    !settingsPanel.contains(event.target as Node) &&
+    settingsButton &&
+    !settingsButton.contains(event.target as Node)) {
     showSettings.value = false;
   }
 }
@@ -234,16 +234,14 @@ const sendOpenAIRequest = async (userInput: string) => {
     scrollToBottom();
 
     // 处理流式响应
-    if (streamResponse.constructor.name === 'Stream') {
-      for await (const chunk of streamResponse as any) {
-        const lastMessage = messages.value[messages.value.length - 1];
-        const content = chunk.choices[0]?.delta?.content || '';
+    for await (const chunk of streamResponse as any) {
+      const lastMessage = messages.value[messages.value.length - 1];
+      const content = chunk.choices[0]?.delta?.content || '';
 
-        if (content) {
-          lastMessage.content += content;
-          // 每个chunk后滚动到底部
-          scrollToBottom();
-        }
+      if (content) {
+        lastMessage.content += content;
+        // 每个chunk后滚动到底部
+        scrollToBottom();
       }
     }
 
@@ -289,9 +287,6 @@ const sendMessage = async (text: string) => {
     type: 'user',
     content: text,
   });
-
-  // 滚动到底部
-  scrollToBottom();
 
   // 调用OpenAI API
   await sendOpenAIRequest(text);
@@ -352,8 +347,7 @@ const activeConversation = computed(() => {
 // 滚动到底部
 const scrollToBottom = () => {
   if (messagesContainer.value) {
-    // 使用requestAnimationFrame确保在下一帧执行滚动
-    window.requestAnimationFrame(() => {
+    nextTick(() => {
       if (messagesContainer.value) {
         messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
       }
@@ -363,7 +357,6 @@ const scrollToBottom = () => {
 
 // 添加和移除点击事件监听器
 onMounted(async () => {
-  scrollToBottom();
   await loadOpenAIApiKey();
 });
 </script>
@@ -398,13 +391,17 @@ onMounted(async () => {
         />
 
         <!-- 消息区域 -->
-        <ChatMessages
-          ref="messagesContainer"
-          :messages="messages"
-        />
+        <div class="flex-1 flex flex-col overflow-hidden">
+          <ChatMessages
+            ref="messagesContainer"
+            :messages="messages"
+          />
 
-        <!-- 输入区域 -->
-        <ChatInput @send="sendMessage"/>
+          <!-- 输入区域 -->
+          <div class="p-4 bg-base-100">
+            <ChatInput @send="sendMessage"/>
+          </div>
+        </div>
       </main>
     </div>
   </div>
