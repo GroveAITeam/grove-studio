@@ -346,9 +346,6 @@ onMounted(() => {
                         :class="{ 'opacity-100': showPassword, 'opacity-50': !showPassword }">👁️</span>
                 </button>
               </div>
-              <div v-if="selectedProvider && getProviderById(selectedProvider)" class="mt-3">
-                <p class="text-sm text-base-content/70">{{ getProviderById(selectedProvider)?.description }}</p>
-              </div>
             </div>
 
             <div class="flex justify-end gap-3 mt-6 md:flex-row sm:flex-col">

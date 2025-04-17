@@ -13,11 +13,11 @@ const goToApiConfig = () => {
 <template>
   <div class="bg-base-200/50 border-base-300/50 border min-w-0 rounded-xl p-4 relative backdrop-blur-md h-full flex flex-col">
     <div class="flex justify-between items-center mb-3">
-      <h2>API集成</h2>
+      <h2>云端模型</h2>
       <span class="bg-primary/20 text-primary px-2 py-1 rounded text-xs">推荐</span>
     </div>
     <div class="flex flex-col gap-4">
-      <p class="text-base-content/80 text-sm">快速集成主流AI服务商的API，立即开始使用</p>
+      <p class="text-base-content/80 text-sm">快速集成主流云端模型接口，立即开始使用</p>
 
       <!-- 特性标签 -->
       <div class="flex flex-wrap gap-2">

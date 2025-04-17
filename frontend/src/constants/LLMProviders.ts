@@ -4,7 +4,6 @@ export interface ProviderInfo {
   id: string;
   name: string;
   icon: string;
-  description: string;
   endpoint: string;
   models: string[];
 }
@@ -15,7 +14,6 @@ export const LLM_PROVIDERS: ProviderInfo[] = [
     id: 'openai',
     name: 'OpenAI',
     icon: '/src/assets/images/providers/openai.png',
-    description: '使用OpenAI API访问GPT-3.5, GPT-4等模型。',
     endpoint: 'https://api.openai.com/v1',
     models: ['gpt-4', 'gpt-3.5-turbo']
   },
@@ -23,7 +21,6 @@ export const LLM_PROVIDERS: ProviderInfo[] = [
     id: 'deepseek',
     name: 'DeepSeek',
     icon: '/src/assets/images/providers/deepseek.png',
-    description: '使用DeepSeek API访问DeepSeek系列模型。',
     endpoint: 'https://api.deepseek.com/v1',
     models: ['deepseek-chat', 'deepseek-coder']
   }

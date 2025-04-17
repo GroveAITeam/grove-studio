@@ -3,15 +3,9 @@ import { Icon } from '@iconify/vue';
 import { defineProps, defineEmits, computed } from 'vue';
 import { LLM_PROVIDERS } from '../../constants/LLMProviders';
 
-interface ModelOption {
-  id: string;
-  name: string;
-  provider: string;
-}
-
 // 获取所有可用模型
-const availableModels = computed<ModelOption[]>(() => {
-  const models: ModelOption[] = [];
+const availableModels = computed(() => {
+  const models = [];
 
   // 从所有提供商中获取模型
   LLM_PROVIDERS.forEach(provider => {
@@ -29,10 +23,10 @@ const availableModels = computed<ModelOption[]>(() => {
 
 const props = defineProps<{
   settings: {
-    model: string;
-    temperature: number;
-    maxTokens: number;
-    contextLength: number;
+    model: string,
+    temperature: number,
+    maxTokens: number,
+    contextLength: number
   }
 }>();
 
