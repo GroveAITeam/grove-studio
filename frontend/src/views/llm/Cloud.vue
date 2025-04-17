@@ -10,6 +10,7 @@ import {
 import {models as modelTypes} from '../../../wailsjs/go/models';
 import {LLM_PROVIDERS, getProviderById, getProviderIcon, getProviderModels} from '../../constants/LLMProviders';
 import {useToast} from "../../utils/toast";
+import ConfirmDialog from '../../components/ConfirmDialog.vue';
 
 interface FormData {
   name: string;
@@ -29,6 +30,11 @@ const pagination = reactive({
 
 // 状态管理
 const showForm = ref(false);
+const showConfirmDialog = ref(false);
+const confirmDialogData = reactive({
+  modelId: 0,
+  message: ''
+});
 const showPassword = ref(false);
 const selectedProvider = ref<string>('');
 const currentModel = ref<modelTypes.CloudLLMModel | null>(null);
@@ -132,12 +138,21 @@ const handleFormSubmit = () => {
 
 // 删除API
 const deleteModel = (id: number) => {
-  if (confirm('确定要删除这个模型吗？')) {
-    DeleteCloudLLMModel(id).then(() => {
-      toast.success("已删除")
-      loadModels()
-    })
-  }
+  confirmDialogData.modelId = id;
+  confirmDialogData.message = '确定要删除这个模型吗？';
+  showConfirmDialog.value = true;
+}
+
+const handleConfirmDelete = () => {
+  DeleteCloudLLMModel(confirmDialogData.modelId).then(() => {
+    toast.success("已删除")
+    loadModels()
+  })
+  showConfirmDialog.value = false;
+}
+
+const handleCancelDelete = () => {
+  showConfirmDialog.value = false;
 }
 
 // 编辑API
@@ -334,6 +349,14 @@ onMounted(() => {
           </form>
         </div>
       </Teleport>
+
+      <!-- 确认对话框 -->
+      <ConfirmDialog
+        :show="showConfirmDialog"
+        :message="confirmDialogData.message"
+        @confirm="handleConfirmDelete"
+        @cancel="handleCancelDelete"
+      />
     </main>
   </div>
 </template>
