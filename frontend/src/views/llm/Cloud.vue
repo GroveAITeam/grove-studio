@@ -205,19 +205,18 @@ onMounted(() => {
 
 <template>
   <div class="container mx-auto px-5 max-w-6xl">
-    <div class="bg-primary/10 rounded-lg p-4 mb-6 flex gap-4">
+    <div class="bg-primary/10 dark:bg-primary/5 rounded-lg p-4 mb-6 flex gap-4">
       <div class="text-2xl">💡</div>
       <div class="flex flex-col gap-2">
-        <p><span class="font-semibold">云端模型</span>允许您使用第三方云服务。请前往服务商官网获取API密钥，并在此页面进行设置。
-        </p>
-        <p>所有API密钥均存储在您的本地设备，不会上传至 Grove 服务器，确保您的账户安全。</p>
+        <p><span class="font-semibold dark:text-base-content">云端模型</span>允许您使用第三方云服务。请前往服务商官网获取API密钥，并在此页面进行设置。</p>
+        <p class="dark:text-base-content/70">所有API密钥均存储在您的本地设备，不会上传至 Grove 服务器，确保您的账户安全。</p>
       </div>
     </div>
 
-    <div class="bg-warning/10 rounded-lg p-4 mb-6 flex gap-4">
+    <div class="bg-warning/10 dark:bg-warning/5 rounded-lg p-4 mb-6 flex gap-4">
       <span class="text-2xl">🔒</span>
-      <div class="text-sm leading-relaxed">
-        <strong>隐私提示：</strong>云端模型可能会收集和存储您的数据。对于敏感数据，我们强烈推荐使用本地私有化模型，确保您的数据始终在本地处理，不经过任何外部服务器。
+      <div class="text-sm leading-relaxed dark:text-base-content/70">
+        <strong class="dark:text-base-content">隐私提示：</strong>云端模型可能会收集和存储您的数据。对于敏感数据，我们强烈推荐使用本地私有化模型，确保您的数据始终在本地处理，不经过任何外部服务器。
       </div>
     </div>
 
@@ -238,40 +237,44 @@ onMounted(() => {
           </div>
 
           <!-- 空状态显示 -->
-          <div class="flex flex-col items-center justify-center py-10 px-5 bg-base-200/30 rounded-lg text-center"
+          <div class="flex flex-col items-center justify-center py-10 px-5 bg-base-200/30 dark:bg-base-100/5 rounded-lg text-center"
                v-else-if="modelList.length === 0">
-            <div class="text-3xl opacity-70 mb-4">🔑</div>
-            <p class="text-base-content/70 mb-5">您还没有添加任何API密钥</p>
+            <div class="text-3xl opacity-70 dark:opacity-60 mb-4">🔑</div>
+            <p class="text-base-content/70 dark:text-base-content/50 mb-5">您还没有添加任何API密钥</p>
           </div>
 
           <!-- API模型列表 -->
-          <div v-else v-for="model in modelList" :key="model.id"
-               class="flex items-center justify-between p-4 bg-base-200/20 rounded-lg border border-base-300 transition-all hover:bg-base-200/40">
-            <div class="flex items-center gap-3">
-              <img :src="getProviderIcon(model.provider)" class="w-10 h-10 object-contain" :alt="model.provider">
-              <div class="flex flex-col">
-                <span class="font-medium text-base text-base-content">{{ model.name }}</span>
-                <span class="text-sm text-base-content/70">{{ model.provider }}</span>
+          <template v-else>
+            <div v-for="model in modelList" :key="model.id"
+                 class="flex items-center justify-between p-4 bg-gradient-to-r from-base-200/20 to-base-200/5 dark:from-gray-800/40 dark:to-gray-800/30 rounded-lg border border-base-300/20 dark:border-gray-700/30 transition-all hover:bg-base-200/30 dark:hover:bg-gray-800/50">
+              <div class="flex items-center gap-4">
+                <div class="min-w-10 h-10 rounded-md bg-white/90 dark:bg-gray-700 flex items-center justify-center p-1.5 border border-base-300/10 dark:border-gray-600">
+                  <img :src="getProviderIcon(model.provider)" class="w-7 h-7 object-contain" :alt="model.provider">
+                </div>
+                <div class="flex flex-col">
+                  <span class="font-medium text-base text-base-content dark:text-gray-200">{{ model.name }}</span>
+                  <span class="text-sm text-base-content/70 dark:text-gray-400">{{ model.provider }}</span>
+                </div>
+              </div>
+              <div class="flex gap-3 items-center">
+                <input type="checkbox" class="toggle toggle-success toggle-sm"
+                       :checked="model.enabled"
+                       @change="toggleModelEnabled(model.id, model.enabled)" />
+                <button class="btn btn-sm bg-base-100/50 dark:bg-gray-700 text-base-content/80 dark:text-gray-300 hover:text-primary dark:hover:text-primary-300 border-base-300/10 dark:border-gray-600 hover:bg-base-100 dark:hover:bg-gray-700/80"
+                        @click="testModel(model)">
+                  <span>测试</span>
+                </button>
+                <button class="btn btn-sm bg-base-100/50 dark:bg-gray-700 text-base-content/80 dark:text-gray-300 hover:text-base-content dark:hover:text-gray-100 border-base-300/10 dark:border-gray-600 hover:bg-base-100 dark:hover:bg-gray-700/80"
+                        @click="editModel(model)">
+                  <span>编辑</span>
+                </button>
+                <button class="btn btn-sm bg-base-100/50 dark:bg-gray-700 text-base-content/80 dark:text-gray-300 hover:text-error dark:hover:text-error-300 border-base-300/10 dark:border-gray-600 hover:bg-base-100 dark:hover:bg-gray-700/80"
+                        @click="deleteModel(model.id)">
+                  <span>删除</span>
+                </button>
               </div>
             </div>
-            <div class="flex gap-4 items-center">
-              <input type="checkbox" class="toggle toggle-success"
-                     :checked="model.enabled"
-                     @change="toggleModelEnabled(model.id, model.enabled)" />
-              <button class="btn btn-ghost btn-sm text-base-content/70 hover:text-primary hover:bg-base-300/50"
-                      @click="testModel(model)">
-                <span>测试</span>
-              </button>
-              <button class="btn btn-ghost btn-sm text-base-content/70 hover:text-base-content hover:bg-base-300/50"
-                      @click="editModel(model)">
-                <span>编辑</span>
-              </button>
-              <button class="btn btn-ghost btn-sm text-base-content/70 hover:text-error hover:bg-base-300/50"
-                      @click="deleteModel(model.id)">
-                <span>删除</span>
-              </button>
-            </div>
-          </div>
+          </template>
         </div>
 
         <!-- 分页组件 -->

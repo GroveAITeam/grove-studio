@@ -37,11 +37,11 @@ const goToApiConfig = () => {
 
       <!-- API提供商图标 -->
       <div class="flex gap-4 mb-6">
-        <div v-for="provider in LLM_PROVIDERS" :key="provider.id" class="bg-base-300/50 text-base-content hover:bg-base-100/50 rounded-lg p-2 transition-all duration-200">
+        <div v-for="provider in LLM_PROVIDERS" :key="provider.id" class="bg-base-300/50 text-base-content rounded-lg p-2 flex flex-col items-center min-w-[80px]">
           <div class="bg-base-100/50 w-10 h-10 flex items-center justify-center rounded-lg">
             <img :src="provider.icon" :alt="provider.name" class="w-6 h-6 opacity-90">
           </div>
-          <span class="text-base-content/90 text-xs">{{ provider.name }}</span>
+          <span class="text-base-content/90 text-xs mt-1 text-center truncate w-full" :title="provider.name">{{ provider.name }}</span>
         </div>
       </div>
 
