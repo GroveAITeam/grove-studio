@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { ref, reactive, onMounted, computed, watch } from 'vue'
-import { Icon } from '@iconify/vue';
 import ConversationList from '../../components/chat/ConversationList.vue';
 import ChatHeader from '../../components/chat/ChatHeader.vue';
 import ChatMessages from '../../components/chat/ChatMessages.vue';
@@ -299,29 +298,6 @@ onMounted(() => {
 ::-webkit-scrollbar-thumb {
   @apply bg-base-content/20 hover:bg-base-content/30;
   border-radius: 10px;
-}
-
-/* Markdown 样式覆盖 */
-.prose {
-  @apply max-w-none text-base-content;
-}
-
-.prose strong {
-  @apply text-base-content font-semibold;
-}
-
-.prose ul {
-  @apply text-base-content;
-}
-
-.prose ol {
-  @apply text-base-content;
-}
-
-/* 打字动画 */
-.typing:after {
-  content: '|';
-  animation: cursor-blink 1s infinite;
 }
 
 @keyframes cursor-blink {

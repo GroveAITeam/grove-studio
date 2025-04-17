@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import { Icon } from '@iconify/vue';
 import {useRouter} from "vue-router";
 
 const router = useRouter();
@@ -285,26 +284,6 @@ function viewUsageStats(id: string): void {
 function hideUsageStats(): void {
   showUsage.value = false;
   currentApi.value = null;
-}
-
-// 获取进度条样式类
-function getProgressBarClass(percentage: number): string {
-  if (percentage > 90) return 'danger';
-  if (percentage > 70) return 'warning';
-  return '';
-}
-
-// 生成模拟使用统计数据
-function generateMockUsageStats(): UsageData {
-  const tokensUsed = Math.floor(Math.random() * 500000) + 10000;
-  const costEstimate = tokensUsed * 0.000002;
-  const quotaPercentage = Math.floor(Math.random() * 100);
-
-  return {
-    tokensUsed,
-    costEstimate,
-    quotaPercentage
-  };
 }
 
 // 显示提示消息

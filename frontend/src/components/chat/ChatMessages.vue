@@ -12,31 +12,6 @@ const props = defineProps<{
   messages: Message[]
 }>();
 
-// 格式化消息内容（支持Markdown语法）
-const formatMessage = (content: string) => {
-  if (!content) return '';
-
-  // 转换粗体
-  content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-  // 转换列表（简单实现）
-  content = content.replace(/^- (.*?)$/gm, '<li>$1</li>');
-  content = content.replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>');
-
-  // 转换有序列表
-  content = content.replace(/^\d+\. (.*?)$/gm, '<li>$1</li>');
-  content = content.replace(/(<li>.*?<\/li>)(?!\s*<\/ul>)/gs, '<ol>$1</ol>');
-
-  // 转换段落
-  content = content.split('\n\n').map((p: string) => {
-    if (!p.startsWith('<ul>') && !p.startsWith('<ol>')) {
-      return `<p>${p}</p>`;
-    }
-    return p;
-  }).join('');
-
-  return content;
-};
 </script>
 
 <template>
@@ -45,7 +20,7 @@ const formatMessage = (content: string) => {
          :class="['flex', message.type === 'user' ? 'justify-end' : '']">
       <div :class="['max-w-[80%] rounded-xl p-3',
                   message.type === 'user' ? 'bg-primary text-primary-content' : 'bg-base-200 text-base-content']">
-        <div :class="['prose prose-sm', message.typing ? 'typing' : '']" v-html="formatMessage(message.content)"></div>
+        <div :class="['prose prose-sm', message.typing ? 'typing' : '']" v-html="message.content"></div>
       </div>
     </div>
   </div>

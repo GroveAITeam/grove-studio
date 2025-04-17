@@ -22,12 +22,6 @@ watch(() => props.selectedMonth, (newVal) => {
   localMonth.value = newVal;
 });
 
-const handleMonthChange = (event: Event) => {
-  const target = event.target as HTMLSelectElement;
-  if (target) {
-    emit('update:selectedMonth', target.value);
-  }
-};
 </script>
 
 <template>

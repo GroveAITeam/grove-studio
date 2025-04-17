@@ -52,26 +52,6 @@ const statuses = [
   { value: 'error', label: '失败' }
 ];
 
-const handleTimeRangeChange = (event: Event) => {
-  const target = event.target as HTMLSelectElement;
-  if (target) {
-    emit('update:selectedTimeRange', target.value);
-  }
-};
-
-const handleModelChange = (event: Event) => {
-  const target = event.target as HTMLSelectElement;
-  if (target) {
-    emit('update:selectedModel', target.value);
-  }
-};
-
-const handleStatusChange = (event: Event) => {
-  const target = event.target as HTMLSelectElement;
-  if (target) {
-    emit('update:selectedStatus', target.value);
-  }
-};
 </script>
 
 <template>

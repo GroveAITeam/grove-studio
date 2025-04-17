@@ -1,25 +1,8 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
 import { Icon } from '@iconify/vue'
-
-// 应用信息
-const appInfo = {
-  name: 'Grove Studio',
-  version: 'v1.0.0'
-}
-
-// 数据存储路径
-const dataPath = ref('/Users/username/Documents/GroveStudio')
-
-// AI模型默认参数
-const modelSettings = ref({
-  temperature: 0.7,
-  maxTokens: 2000
-})
 
 // 保存设置
 const saveSettings = () => {
-  // 这里可以实现实际的设置保存逻辑
   console.log('设置已保存')
 }
 </script>
