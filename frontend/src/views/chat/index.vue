@@ -6,29 +6,58 @@ import ChatMessages from '../../components/chat/ChatMessages.vue';
 import ChatInput from '../../components/chat/ChatInput.vue';
 import SettingsPanel from '../../components/chat/SettingsPanel.vue';
 import OpenAI from "openai";
-import {GetCloudLLMModels} from '../../../wailsjs/go/main/App';
+import {GetCloudLLMModels, SetSetting, GetSetting} from '../../../wailsjs/go/main/App';
 import {useToast} from "../../utils/toast";
+import {LLM_PROVIDERS, getProviderById} from '../../constants/LLMProviders';
 
 const toast = useToast();
 let client: OpenAI | null = null;
+const SETTINGS_STORAGE_KEY = 'chat_settings';
 
 // 加载可用的OpenAI API Key
 const loadOpenAIApiKey = async () => {
   const result = await GetCloudLLMModels(1, 10);
-  const openaiModel = result.items.find(model => model.enabled);
-  if (openaiModel) {
-    client = new OpenAI({
-      apiKey: openaiModel.api_key,
-      dangerouslyAllowBrowser: true,
-    });
-    if (openaiModel.name) {
-      settings.model = openaiModel.name;
+  // 获取被启用的云端模型
+  const enabledModel = result.items.find(model => model.enabled);
+
+  if (enabledModel) {
+    try {
+      // 从localStorage加载设置
+      loadSettingsFromLocalStorage();
+
+      // 查找对应提供商的信息
+      const providerInfo = LLM_PROVIDERS.find(p => p.id === enabledModel.provider);
+
+      if (!providerInfo) {
+        toast.error(`未找到提供商信息: ${enabledModel.provider}`);
+        return false;
+      }
+
+      // 初始化OpenAI客户端
+      client = new OpenAI({
+        apiKey: enabledModel.api_key,
+        baseURL: enabledModel.endpoint || providerInfo.endpoint,
+        dangerouslyAllowBrowser: true,
+      });
+
+      // 如果模型为空，或者模型格式不是新格式 (configId:modelName)
+      const isValidModelId = settings.model && settings.model.includes(':');
+
+      if (!isValidModelId && providerInfo.models.length > 0) {
+        // 使用新格式的模型ID: "configId:modelName"
+        settings.model = `${enabledModel.id}:${providerInfo.models[0]}`;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('加载设置失败:', error);
+      toast.error('加载模型设置失败');
+      return false;
     }
-    return true;
   } else {
+    toast.error('未找到启用的云端模型配置');
     return false;
   }
-
 };
 
 // 类型定义
@@ -68,14 +97,57 @@ function getCurrentTime(): string {
 // 设置面板
 const showSettings = ref(false)
 const settings = reactive({
-  model: 'gpt-3.5-turbo',
+  model: '',
   temperature: 0.7,
   maxTokens: 2000,
   contextLength: 10
 })
 
+// 从localStorage加载设置时确保类型正确
+const loadSettingsFromLocalStorage = () => {
+  const savedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
+  if (savedSettings) {
+    try {
+      const parsedSettings = JSON.parse(savedSettings);
+
+      // 确保数值类型正确
+      if (parsedSettings.temperature) settings.temperature = Number(parsedSettings.temperature);
+      if (parsedSettings.maxTokens) settings.maxTokens = Number(parsedSettings.maxTokens);
+      if (parsedSettings.contextLength) settings.contextLength = Number(parsedSettings.contextLength);
+      if (parsedSettings.model) settings.model = parsedSettings.model;
+    } catch (error) {
+      console.error('解析保存的设置失败:', error);
+    }
+  }
+}
+
+// 保存设置到localStorage
+const saveSettings = () => {
+  localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+}
+
+// 监听设置变化，自动保存
+watch(settings, () => {
+  saveSettings();
+}, { deep: true });
+
 const toggleSettings = () => {
   showSettings.value = !showSettings.value
+}
+
+// 点击空白处关闭设置面板
+const handleClickOutside = (event: MouseEvent) => {
+  // 获取设置面板和触发按钮的元素
+  const settingsPanel = document.querySelector('.settings-panel');
+  const settingsButton = document.querySelector('.settings-button');
+
+  // 如果点击的不是设置面板内的元素，也不是触发按钮，则关闭面板
+  if (settingsPanel &&
+      !settingsPanel.contains(event.target as Node) &&
+      settingsButton &&
+      !settingsButton.contains(event.target as Node)) {
+    showSettings.value = false;
+  }
 }
 
 // 监听消息变化自动滚动
@@ -89,64 +161,124 @@ const sendOpenAIRequest = async (userInput: string) => {
     toast.error("请先配置云端模型")
     return
   }
-  const history = messages.value.slice(-settings.contextLength).map(msg => ({
-    role: msg.type,
-    content: msg.content
-  }));
 
-  history.push({
-    role: 'user',
-    content: userInput
-  });
+  // 检查是否已选择模型
+  if (!settings.model) {
+    toast.error("请先选择语言模型")
+    return
+  }
 
-  // 发送请求
-  const response = await client.chat.completions.create({
-    model: settings.model,
-    messages: history,
-    temperature: settings.temperature,
-    max_tokens: settings.maxTokens,
-    stream: true,
-  });
+  // 解析模型ID: 格式为 "configId:modelName"
+  const [configIdStr, modelName] = settings.model.split(':');
 
-  // 添加助手消息（带有typing标记）
-  messages.value.push({
-    type: 'assistant',
-    content: '',
-    typing: true
-  });
+  if (!configIdStr || !modelName) {
+    toast.error("模型ID格式错误");
+    return;
+  }
 
-  // 滚动到底部
-  setTimeout(scrollToBottom, 50);
+  // 获取云端模型配置
+  const configId = Number(configIdStr);
 
-  // 处理流式响应
-  for await (const chunk of response) {
+  try {
+    // 获取云端模型配置
+    const result = await GetCloudLLMModels(1, 100);
+    const modelConfig = result.items.find(item => item.id === configId);
+
+    if (!modelConfig) {
+      toast.error("未找到对应的模型配置");
+      return;
+    }
+
+    // 更新client配置，确保每次请求使用正确的endpoint和API key
+    client.baseURL = modelConfig.endpoint;
+    client.apiKey = modelConfig.api_key;
+
+    // 确保上下文长度是数字
+    const contextLength = Number(settings.contextLength);
+
+    const history = messages.value.slice(-contextLength).map(msg => ({
+      role: msg.type,
+      content: msg.content
+    }));
+
+    history.push({
+      role: 'user',
+      content: userInput
+    });
+
+    // 准备请求参数
+    const requestParams: any = {
+      model: modelName,
+      messages: history,
+      temperature: Number(settings.temperature),
+      stream: true,
+    };
+
+    // 只有在非"完整"模式下才传递max_tokens参数
+    const maxTokensValue = Number(settings.maxTokens);
+    if (maxTokensValue <= 3500) {
+      requestParams.max_tokens = maxTokensValue;
+    }
+
+    // 发送请求
+    const streamResponse = await client.chat.completions.create(requestParams);
+
+    // 添加助手消息（带有typing标记）
+    messages.value.push({
+      type: 'assistant',
+      content: '',
+      typing: true
+    });
+
+    // 滚动到底部
+    scrollToBottom();
+
+    // 处理流式响应
+    if (streamResponse.constructor.name === 'Stream') {
+      for await (const chunk of streamResponse as any) {
+        const lastMessage = messages.value[messages.value.length - 1];
+        const content = chunk.choices[0]?.delta?.content || '';
+
+        if (content) {
+          lastMessage.content += content;
+          // 每个chunk后滚动到底部
+          scrollToBottom();
+        }
+      }
+    }
+
+    // 流式输出完成，移除typing标记
     const lastMessage = messages.value[messages.value.length - 1];
-    const content = chunk.choices[0]?.delta?.content || '';
+    lastMessage.typing = false;
 
-    if (content) {
-      lastMessage.content += content;
+    // 确保结束后再次滚动到底部
+    scrollToBottom();
+
+    // 如果是第一条消息，更新对话标题
+    if (messages.value.length === 3 && activeConversation.value.title === '新对话') {
+      // 生成标题，通常使用用户消息的前几个字
+      const userMessage = userInput.trim();
+      const title = userMessage.length > 15
+        ? userMessage.substring(0, 15) + '...'
+        : userMessage;
+
+      // 更新当前活动对话的标题
+      const activeConvIndex = conversations.value.findIndex(c => c.active);
+      if (activeConvIndex !== -1) {
+        conversations.value[activeConvIndex].title = title;
+      }
+    }
+  } catch (error) {
+    console.error('OpenAI请求失败:', error);
+    toast.error('发送请求失败，请稍后重试');
+
+    // 移除typing消息
+    const typingIndex = messages.value.findIndex(msg => msg.typing);
+    if (typingIndex !== -1) {
+      messages.value.splice(typingIndex, 1);
     }
   }
-
-  // 流式输出完成，移除typing标记
-  const lastMessage = messages.value[messages.value.length - 1];
-  lastMessage.typing = false;
-
-  // 如果是第一条消息，更新对话标题
-  if (messages.value.length === 3 && activeConversation.value.title === '新对话') {
-    // 生成标题，通常使用用户消息的前几个字
-    const userMessage = userInput.trim();
-    const title = userMessage.length > 15
-      ? userMessage.substring(0, 15) + '...'
-      : userMessage;
-
-    // 更新当前活动对话的标题
-    const activeConvIndex = conversations.value.findIndex(c => c.active);
-    if (activeConvIndex !== -1) {
-      conversations.value[activeConvIndex].title = title;
-    }
-  }
-};
+}
 
 // 发送消息
 const sendMessage = async (text: string) => {
@@ -159,7 +291,7 @@ const sendMessage = async (text: string) => {
   });
 
   // 滚动到底部
-  setTimeout(scrollToBottom, 50);
+  scrollToBottom();
 
   // 调用OpenAI API
   await sendOpenAIRequest(text);
@@ -189,7 +321,7 @@ const switchConversation = (conversation: Conversation) => {
   });
   messages.value = [];
   // 滚动到底部
-  setTimeout(scrollToBottom, 50);
+  scrollToBottom();
 };
 
 // 删除对话
@@ -220,11 +352,16 @@ const activeConversation = computed(() => {
 // 滚动到底部
 const scrollToBottom = () => {
   if (messagesContainer.value) {
-    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+    // 使用requestAnimationFrame确保在下一帧执行滚动
+    window.requestAnimationFrame(() => {
+      if (messagesContainer.value) {
+        messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+      }
+    });
   }
 };
 
-// 监视消息变化，自动滚动到底部
+// 添加和移除点击事件监听器
 onMounted(async () => {
   scrollToBottom();
   await loadOpenAIApiKey();
@@ -232,7 +369,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex flex-col h-full w-full overflow-hidden">
+  <div class="flex flex-col h-full w-full overflow-hidden" @click="showSettings && handleClickOutside($event)">
     <!-- 聊天界面 -->
     <div class="flex flex-1 overflow-hidden">
       <!-- 侧边栏 -->
@@ -249,6 +386,7 @@ onMounted(async () => {
         <ChatHeader
           :title="activeConversation.title"
           @toggle-settings="toggleSettings"
+          class="settings-button"
         />
 
         <!-- 设置面板 -->
@@ -256,6 +394,7 @@ onMounted(async () => {
           v-if="showSettings"
           :settings="settings"
           @close="toggleSettings"
+          class="settings-panel"
         />
 
         <!-- 消息区域 -->

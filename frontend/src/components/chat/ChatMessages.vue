@@ -4,7 +4,6 @@ import { defineProps } from 'vue';
 interface Message {
   type: 'user' | 'assistant';
   content: string;
-  time: string;
   typing?: boolean;
 }
 
@@ -15,10 +14,10 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="flex-1 overflow-y-auto py-3 px-4 space-y-4">
+  <div class="flex-1 overflow-y-auto py-3 px-4 space-y-4" ref="messagesContainer">
     <div v-for="(message, index) in messages" :key="index"
          :class="['flex', message.type === 'user' ? 'justify-end' : '']">
-      <div :class="['max-w-[80%] rounded-xl p-3',
+      <div :class="['max-w-[80%] rounded-xl p-3 relative',
                   message.type === 'user' ? 'bg-primary text-primary-content' : 'bg-base-200 text-base-content']">
         <div :class="['prose prose-sm', message.typing ? 'typing' : '']" v-html="message.content"></div>
       </div>
