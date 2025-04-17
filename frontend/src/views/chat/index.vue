@@ -5,6 +5,19 @@ import ChatHeader from '../../components/chat/ChatHeader.vue';
 import ChatMessages from '../../components/chat/ChatMessages.vue';
 import ChatInput from '../../components/chat/ChatInput.vue';
 import SettingsPanel from '../../components/chat/SettingsPanel.vue';
+import OpenAI from "openai"
+
+const client = new OpenAI({
+  apiKey: "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",
+  dangerouslyAllowBrowser: true,
+});
+client.responses.create({
+  model: "gpt-4.1",
+  input: "你好",
+  stream: true,
+}).then((response) => {
+  console.log(response)
+})
 
 // 类型定义
 interface Conversation {
