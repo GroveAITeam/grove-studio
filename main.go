@@ -54,12 +54,12 @@ func main() {
 		},
 		// Windows 平台特殊配置
 		Windows: &windows.Options{
-			WebviewIsTransparent: true,
-			WindowIsTranslucent:  true,
-			DisableWindowIcon:    true,
-			// DisableFramelessWindowDecorations: false,
-			WebviewUserDataPath: "",
-			BackdropType:        windows.Acrylic,
+			WebviewIsTransparent:              true,
+			WindowIsTranslucent:               true,
+			DisableWindowIcon:                 true,
+			DisableFramelessWindowDecorations: false,
+			WebviewUserDataPath:               "",
+			BackdropType:                      windows.Acrylic,
 		},
 		// Mac 平台特殊配置
 		Mac: &mac.Options{

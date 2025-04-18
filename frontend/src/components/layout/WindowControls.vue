@@ -19,7 +19,7 @@ const emit = defineEmits<{
 
 <template>
   <!-- windows 定制化窗口按钮 -->
-  <div v-if="isNotMac" class="flex h-10 justify-between items-center flex-0 border-b border-base-200" style="--wails-draggable:drag">
+  <div v-if="isNotMac" class="flex h-10 mr-6 justify-between justify-center items-center flex-0 border-b border-base-200" style="--wails-draggable:drag">
     <div class="px-4 text-base-content">{{ routeName }}</div>
     <div class="flex">
       <button class="btn btn-ghost btn-sm w-10 h-10" @click="$emit('minimise')">
@@ -28,7 +28,7 @@ const emit = defineEmits<{
       <button class="btn btn-ghost btn-sm w-10 h-10" @click="isMaximised ? $emit('unmaximise') : $emit('maximise')">
         <Icon icon="mdi:window-maximize" />
       </button>
-      <button class="btn btn-ghost btn-sm w-10 h-10 hover:text-white" @click="$emit('quit')">
+      <button class="btn btn-ghost btn-sm w-10 h-10" @click="$emit('quit')">
         <Icon icon="mdi:window-close" />
       </button>
     </div>
