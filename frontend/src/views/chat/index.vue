@@ -10,6 +10,16 @@ import {GetCloudLLMModels} from '../../../wailsjs/go/main/App';
 import {useToast} from "../../utils/toast";
 import {LLM_PROVIDERS} from '../../constants/LLMProviders';
 
+
+// 测试golang流式输出
+import { EventsOn } from '../../../wailsjs/runtime';
+import {SendMessageStream} from "../../../wailsjs/go/main/App";
+EventsOn("stream-message", (data) => {
+  console.log(data)
+})
+
+SendMessageStream("hello").then(() => {})
+
 const toast = useToast();
 let client: OpenAI | null = null;
 const SETTINGS_STORAGE_KEY = 'chat_settings';
