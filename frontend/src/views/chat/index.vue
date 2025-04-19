@@ -199,16 +199,7 @@ const sendOpenAIRequest = async (userInput: string) => {
     // 确保消息添加后滚动到底部
     await scrollToBottom();
 
-    EventsOn("stream-request-message", async (data) => {
-      console.log(data)
-      const lastMessage = messages.value[messages.value.length - 1];
-      lastMessage.content += data.content;
-      // 添加内容后定期滚动到底部
-      if (lastMessage.content.length % 10 === 0) {
-        await scrollToBottom();
-      }
-    })
-
+    // 只负责发起流式请求
     StreamRequestMessage({
       cloud_llm_id: modelConfig.id,
       conversation_id: 0,
@@ -219,7 +210,7 @@ const sendOpenAIRequest = async (userInput: string) => {
       history_length: Number(settings.contextLength),
     }).then((totalToken) => {console.log("token消耗量为" + totalToken)})
 
-    // 流式输出完成，移除typing标记
+    // 流式输出完成，移除typing标记（实际应在流式结束后处理，这里保留原逻辑）
     const lastMessage = messages.value[messages.value.length - 1];
     lastMessage.typing = false;
 
@@ -324,6 +315,53 @@ const activeConversation = computed(() => {
 watch(messages, async () => {
   await scrollToBottom();
 }, {deep: true});
+
+// 只注册一次流式消息监听
+// 用于缓存分片内容
+const streamChunks = ref<string[]>([]);
+
+EventsOn("stream-request-message", (data) => {
+  // data.index: 当前分片序号
+  // data.content: 内容
+  // data.done: 是否结束
+  if (typeof data.index !== 'number') return;
+
+  // 查找最后一个typing的assistant消息
+  const lastTypingIndex = messages.value.slice().reverse().findIndex(msg => msg.type === 'assistant' && msg.typing);
+  let lastMessage;
+  if (lastTypingIndex !== -1) {
+    lastMessage = messages.value[messages.value.length - 1 - lastTypingIndex];
+  } else {
+    // 兜底：找最后一个assistant消息
+    lastMessage = messages.value.slice().reverse().find(msg => msg.type === 'assistant');
+  }
+
+  if (lastMessage) {
+    try {
+      // 确保数组长度足够
+      while (streamChunks.value.length <= data.index) {
+        streamChunks.value.push('');
+      }
+      // 存储当前分片
+      streamChunks.value[data.index] = data.content || '';
+
+      // 拼接所有内容
+      lastMessage.content = streamChunks.value.join('');
+
+      // 添加内容后定期滚动到底部
+      if (lastMessage.content.length % 10 === 0) {
+        scrollToBottom();
+      }
+
+      // 如果流式结束，清空缓存
+      if (data.done) {
+        streamChunks.value = [];
+      }
+    } catch (error) {
+      console.error('处理流式消息出错:', error);
+    }
+  }
+});
 
 // 初始化
 onMounted(async () => {
