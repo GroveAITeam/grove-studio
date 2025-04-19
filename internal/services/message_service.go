@@ -4,6 +4,7 @@ import (
     "context"
     "errors"
     "fmt"
+    "github.com/openai/openai-go/packages/ssestream"
     "grove-studio/internal/database"
     "grove-studio/internal/models"
     "grove-studio/internal/utils"
@@ -64,55 +65,63 @@ func (n *MessageService) GetList(conversationId, minId, size int) (*MessagePageR
     return &MessagePageResult{Items: items}, nil
 }
 
-// Request 给大模型发消息
-func (n *MessageService) Request(params MessageRequestParams) (int64, error) {
+// validateRequestParams 验证请求参数
+func (n *MessageService) validateRequestParams(params MessageRequestParams) error {
     if params.CloudLLMId <= 0 {
-        return 0, errors.New("模型ID不能为空")
+        return errors.New("模型ID不能为空")
     }
     if params.Question == "" {
-        return 0, errors.New("问题不能为空")
+        return errors.New("问题不能为空")
     }
     if params.ModelName == "" {
-        return 0, errors.New("模型名称不能为空")
+        return errors.New("模型名称不能为空")
     }
     if params.Temperature <= 0 {
-        return 0, errors.New("温蒂不能为空")
+        return errors.New("温蒂不能为空")
     }
+    return nil
+}
 
+// getModelAndConversation 获取模型和会话信息
+func (n *MessageService) getModelAndConversation(params MessageRequestParams) (models.CloudLLMModel, models.Conversation, []models.Message, error) {
     var cloudLLM models.CloudLLMModel
     var conversation models.Conversation
     var historyMessages []models.Message
-    var message models.Message
 
     if err := database.DB.Where("id = ?", params.CloudLLMId).First(&cloudLLM).Error; err != nil {
         n.logger.Error("查找模型失败: %v", err)
-        return 0, err
+        return cloudLLM, conversation, historyMessages, err
     }
     if cloudLLM.ID == 0 {
         msg := fmt.Sprintf("ID=%d的模型不存在", params.CloudLLMId)
         n.logger.Error(msg)
-        return 0, errors.New(msg)
+        return cloudLLM, conversation, historyMessages, errors.New(msg)
     }
 
     if params.ConversationId > 0 {
         if err := database.DB.Where("id = ?", params.ConversationId).First(&conversation).Error; err != nil {
             n.logger.Error("查询会话失败: %v", err)
-            return 0, err
+            return cloudLLM, conversation, historyMessages, err
         }
         if conversation.ID == 0 {
             msg := fmt.Sprintf("ID=%d的会话不存在", params.ConversationId)
             n.logger.Error(msg)
-            return 0, errors.New(msg)
+            return cloudLLM, conversation, historyMessages, errors.New(msg)
         }
         if err := database.DB.Where("conversation_id = ?", params.ConversationId).Order("id desc").Limit(int(params.HistoryLength) * 2).Find(&historyMessages).Error; err != nil {
-            return 0, err
+            return cloudLLM, conversation, historyMessages, err
         }
     } else {
         if err := database.DB.Create(&conversation).Error; err != nil {
-            return 0, err
+            return cloudLLM, conversation, historyMessages, err
         }
     }
 
+    return cloudLLM, conversation, historyMessages, nil
+}
+
+// prepareMessages 准备消息历史
+func (n *MessageService) prepareMessages(historyMessages []models.Message, question string) []openai.ChatCompletionMessageParamUnion {
     var messages []openai.ChatCompletionMessageParamUnion
     for i := len(historyMessages) - 1; i >= 0; i-- {
         msg := historyMessages[i]
@@ -123,25 +132,15 @@ func (n *MessageService) Request(params MessageRequestParams) (int64, error) {
             messages = append(messages, openai.AssistantMessage(msg.Content))
         }
     }
-    messages = append(messages, openai.UserMessage(params.Question))
+    messages = append(messages, openai.UserMessage(question))
+    return messages
+}
 
-    openaiParams := openai.ChatCompletionNewParams{
-        Messages: messages,
-        Model:    params.ModelName,
-        StreamOptions: openai.ChatCompletionStreamOptionsParam{
-            IncludeUsage: param.NewOpt(true),
-        },
-        Temperature: param.NewOpt(params.Temperature),
-    }
-    if params.MaxCompletionTokens > 0 {
-        openaiParams.MaxCompletionTokens = param.NewOpt(int64(params.MaxCompletionTokens))
-    }
-
-    client := openai.NewClient(option.WithAPIKey(cloudLLM.ApiKey))
-    stream := client.Chat.Completions.NewStreaming(n.ctx, openaiParams)
+// handleStreamResponse 处理流式响应
+func (n *MessageService) handleStreamResponse(stream *ssestream.Stream[openai.ChatCompletionChunk]) (*openai.ChatCompletionAccumulator, error) {
     acc := openai.ChatCompletionAccumulator{}
-
     chunkIndex := 0
+
     for stream.Next() {
         chunk := stream.Current()
         acc.AddChunk(chunk)
@@ -165,26 +164,71 @@ func (n *MessageService) Request(params MessageRequestParams) (int64, error) {
 
     if err := stream.Err(); err != nil {
         n.logger.Error("流式输出请求失败: %v", err)
-        return 0, err
+        return nil, err
     }
 
+    return &acc, nil
+}
+
+// saveMessages 保存消息记录
+func (n *MessageService) saveMessages(conversationID uint, question string, response string) error {
     // 保存用户消息
-    message = models.Message{
-        ConversationID: conversation.ID,
+    userMessage := models.Message{
+        ConversationID: conversationID,
         Role:           "user",
-        Content:        params.Question,
+        Content:        question,
     }
-    if err := database.DB.Create(&message).Error; err != nil {
-        return 0, err
+    if err := database.DB.Create(&userMessage).Error; err != nil {
+        return err
     }
 
     // 保存AI消息
-    message = models.Message{
-        ConversationID: conversation.ID,
+    assistantMessage := models.Message{
+        ConversationID: conversationID,
         Role:           "assistant",
-        Content:        acc.Choices[0].Message.Content,
+        Content:        response,
     }
-    if err := database.DB.Create(&message).Error; err != nil {
+    if err := database.DB.Create(&assistantMessage).Error; err != nil {
+        return err
+    }
+
+    return nil
+}
+
+// Request 给大模型发消息
+func (n *MessageService) Request(params MessageRequestParams) (int64, error) {
+    if err := n.validateRequestParams(params); err != nil {
+        return 0, err
+    }
+
+    cloudLLM, conversation, historyMessages, err := n.getModelAndConversation(params)
+    if err != nil {
+        return 0, err
+    }
+
+    messages := n.prepareMessages(historyMessages, params.Question)
+
+    openaiParams := openai.ChatCompletionNewParams{
+        Messages: messages,
+        Model:    params.ModelName,
+        StreamOptions: openai.ChatCompletionStreamOptionsParam{
+            IncludeUsage: param.NewOpt(true),
+        },
+        Temperature: param.NewOpt(params.Temperature),
+    }
+    if params.MaxCompletionTokens > 0 {
+        openaiParams.MaxCompletionTokens = param.NewOpt(int64(params.MaxCompletionTokens))
+    }
+
+    client := openai.NewClient(option.WithAPIKey(cloudLLM.ApiKey))
+    stream := client.Chat.Completions.NewStreaming(n.ctx, openaiParams)
+
+    acc, err := n.handleStreamResponse(stream)
+    if err != nil {
+        return 0, err
+    }
+
+    if err := n.saveMessages(conversation.ID, params.Question, acc.Choices[0].Message.Content); err != nil {
         return 0, err
     }
 
