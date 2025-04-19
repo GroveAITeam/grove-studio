@@ -19,7 +19,7 @@ EventsOn("stream-request-message", (data) => {
 
 StreamRequestMessage({
   cloud_llm_id: 1,
-  conversation: 1,
+  conversation_id: 1,
   question: "你好",
   model_name: "gpt-4.1",
 }).then(() => {})

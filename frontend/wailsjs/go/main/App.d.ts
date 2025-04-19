@@ -22,7 +22,7 @@ export function GetSetting(arg1:string):Promise<string>;
 
 export function SetSetting(arg1:string,arg2:string):Promise<void>;
 
-export function StreamRequestMessage(arg1:services.MessageRequestParams):Promise<void>;
+export function StreamRequestMessage(arg1:services.MessageRequestParams):Promise<number>;
 
 export function ToggleCloudLLMModelEnabled(arg1:number,arg2:boolean):Promise<void>;
 

@@ -246,7 +246,7 @@ export namespace services {
 	}
 	export class MessageRequestParams {
 	    cloud_llm_id: number;
-	    conversation: number;
+	    conversation_id: number;
 	    question: string;
 	    model_name: string;
 	
@@ -257,7 +257,7 @@ export namespace services {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.cloud_llm_id = source["cloud_llm_id"];
-	        this.conversation = source["conversation"];
+	        this.conversation_id = source["conversation_id"];
 	        this.question = source["question"];
 	        this.model_name = source["model_name"];
 	    }

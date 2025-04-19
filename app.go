@@ -1,186 +1,186 @@
 package main
 
 import (
-    "context"
-    "fmt"
-    "path/filepath"
+	"context"
+	"fmt"
+	"path/filepath"
 
-    "github.com/wailsapp/wails/v2/pkg/logger"
+	"github.com/wailsapp/wails/v2/pkg/logger"
 
-    "grove-studio/internal/config"
-    "grove-studio/internal/database"
-    "grove-studio/internal/models"
-    "grove-studio/internal/services"
-    "grove-studio/internal/utils"
+	"grove-studio/internal/config"
+	"grove-studio/internal/database"
+	"grove-studio/internal/models"
+	"grove-studio/internal/services"
+	"grove-studio/internal/utils"
 
-    "github.com/wailsapp/wails/v2/pkg/runtime"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // App struct
 type App struct {
-    ctx                  context.Context
-    logger               *utils.Logger
-    settingService       *services.SettingService
-    cloudLLMModelService *services.CloudLLMModelService
-    conversationService  *services.ConversationService
-    messageService       *services.MessageService
+	ctx                  context.Context
+	logger               *utils.Logger
+	settingService       *services.SettingService
+	cloudLLMModelService *services.CloudLLMModelService
+	conversationService  *services.ConversationService
+	messageService       *services.MessageService
 }
 
 // NewApp creates a new App application struct
 func NewApp() *App {
-    return &App{}
+	return &App{}
 }
 
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
-    a.ctx = ctx
-    a.logger = utils.NewLogger(ctx)
-    a.settingService = services.NewSettingService(ctx)
-    a.cloudLLMModelService = services.NewCloudLLMModelService(ctx)
-    a.conversationService = services.NewConversationService(ctx)
-    a.messageService = services.NewMessageService(ctx)
+	a.ctx = ctx
+	a.logger = utils.NewLogger(ctx)
+	a.settingService = services.NewSettingService(ctx)
+	a.cloudLLMModelService = services.NewCloudLLMModelService(ctx)
+	a.conversationService = services.NewConversationService(ctx)
+	a.messageService = services.NewMessageService(ctx)
 
-    // 获取应用数据路径
-    appDataPath, err := utils.GetAppDataPath()
-    if err != nil {
-        a.logger.Fatal("获取应用数据路径失败: %v", err)
-        return
-    }
+	// 获取应用数据路径
+	appDataPath, err := utils.GetAppDataPath()
+	if err != nil {
+		a.logger.Fatal("获取应用数据路径失败: %v", err)
+		return
+	}
 
-    // 获取环境信息，检查是否为开发模式
-    envInfo := runtime.Environment(ctx)
-    isDevMode := envInfo.BuildType == "dev"
-    if isDevMode {
-        runtime.LogSetLogLevel(ctx, logger.DEBUG)
-    }
+	// 获取环境信息，检查是否为开发模式
+	envInfo := runtime.Environment(ctx)
+	isDevMode := envInfo.BuildType == "dev"
+	if isDevMode {
+		runtime.LogSetLogLevel(ctx, logger.DEBUG)
+	}
 
-    // 使用日志记录运行模式
-    a.logger.Info("当前运行模式: %s", envInfo.BuildType)
+	// 使用日志记录运行模式
+	a.logger.Info("当前运行模式: %s", envInfo.BuildType)
 
-    // 加载配置
-    configPath := filepath.Join(appDataPath, "config.json")
-    if err := config.LoadConfig(configPath); err != nil {
-        runtime.LogError(ctx, fmt.Sprintf("加载配置失败: %v", err))
-        return
-    }
+	// 加载配置
+	configPath := filepath.Join(appDataPath, "config.json")
+	if err := config.LoadConfig(configPath); err != nil {
+		runtime.LogError(ctx, fmt.Sprintf("加载配置失败: %v", err))
+		return
+	}
 
-    // 根据运行模式设置调试模式
-    config.GetConfig().DebugMode = isDevMode
+	// 根据运行模式设置调试模式
+	config.GetConfig().DebugMode = isDevMode
 
-    // 保存数据路径到配置
-    config.GetConfig().DataPath = appDataPath
-    if err := config.SaveConfig(configPath); err != nil {
-        runtime.LogError(ctx, fmt.Sprintf("保存配置失败: %v", err))
-    }
+	// 保存数据路径到配置
+	config.GetConfig().DataPath = appDataPath
+	if err := config.SaveConfig(configPath); err != nil {
+		runtime.LogError(ctx, fmt.Sprintf("保存配置失败: %v", err))
+	}
 
-    // 初始化数据库
-    if err := database.InitDB(appDataPath, config.GetConfig().DebugMode); err != nil {
-        runtime.LogError(ctx, fmt.Sprintf("初始化数据库失败: %v", err))
-        return
-    }
+	// 初始化数据库
+	if err := database.InitDB(appDataPath, config.GetConfig().DebugMode); err != nil {
+		runtime.LogError(ctx, fmt.Sprintf("初始化数据库失败: %v", err))
+		return
+	}
 
-    // 自动迁移数据库表结构
-    dst := []interface{}{
-        &models.Setting{},
-        &models.CloudLLMModel{},
-        &models.Conversation{},
-        &models.Message{},
-    }
-    if err := database.DB.AutoMigrate(dst...); err != nil {
-        runtime.LogError(ctx, fmt.Sprintf("数据库迁移失败: %v", err))
-        return
-    }
+	// 自动迁移数据库表结构
+	dst := []interface{}{
+		&models.Setting{},
+		&models.CloudLLMModel{},
+		&models.Conversation{},
+		&models.Message{},
+	}
+	if err := database.DB.AutoMigrate(dst...); err != nil {
+		runtime.LogError(ctx, fmt.Sprintf("数据库迁移失败: %v", err))
+		return
+	}
 
-    runtime.LogInfo(ctx, "应用初始化完成")
+	runtime.LogInfo(ctx, "应用初始化完成")
 }
 
 // domReady is called after front-end resources have been loaded
 func (a *App) domReady(ctx context.Context) {
-    // 前端加载完成后通知
-    runtime.LogInfo(ctx, "前端资源加载完成")
-    runtime.EventsEmit(ctx, "app:ready", true)
+	// 前端加载完成后通知
+	runtime.LogInfo(ctx, "前端资源加载完成")
+	runtime.EventsEmit(ctx, "app:ready", true)
 }
 
 // beforeClose is called when the application is about to quit,
 // either by clicking the window close button or calling runtime.Quit.
 // Returning true will cause the application to continue, false will continue shutdown as normal.
 func (a *App) beforeClose(ctx context.Context) (prevent bool) {
-    runtime.LogInfo(ctx, "应用即将关闭")
-    return false
+	runtime.LogInfo(ctx, "应用即将关闭")
+	return false
 }
 
 // shutdown is called at application termination
 func (a *App) shutdown(ctx context.Context) {
-    // 关闭数据库连接
-    if err := database.CloseDB(); err != nil {
-        runtime.LogError(ctx, fmt.Sprintf("关闭数据库连接失败: %v", err))
-    }
-    runtime.LogInfo(ctx, "应用已关闭")
+	// 关闭数据库连接
+	if err := database.CloseDB(); err != nil {
+		runtime.LogError(ctx, fmt.Sprintf("关闭数据库连接失败: %v", err))
+	}
+	runtime.LogInfo(ctx, "应用已关闭")
 }
 
 // GetSetting 获取设置值
 func (a *App) GetSetting(key string) (string, error) {
-    return a.settingService.GetSetting(key)
+	return a.settingService.GetSetting(key)
 }
 
 // SetSetting 设置值
 func (a *App) SetSetting(key, value string) error {
-    return a.settingService.SetSetting(key, value)
+	return a.settingService.SetSetting(key, value)
 }
 
 // GetAppConfig 获取应用配置
 func (a *App) GetAppConfig() (*config.AppConfig, error) {
-    return config.GetConfig(), nil
+	return config.GetConfig(), nil
 }
 
 // ----------------------------- 云端模型相关API -----------------------------
 
 // GetCloudLLMModels 分页获取云端模型列表
 func (a *App) GetCloudLLMModels(page, size int) (*services.CloudLLMModelPageResult, error) {
-    return a.cloudLLMModelService.GetList(page, size)
+	return a.cloudLLMModelService.GetList(page, size)
 }
 
 // GetCloudLLMModelByID 获取云端模型详情
 func (a *App) GetCloudLLMModelByID(id uint) (*models.CloudLLMModel, error) {
-    return a.cloudLLMModelService.GetByID(id)
+	return a.cloudLLMModelService.GetByID(id)
 }
 
 // CreateCloudLLMModel 创建云端模型
 func (a *App) CreateCloudLLMModel(model *models.CloudLLMModel) error {
-    return a.cloudLLMModelService.Create(model)
+	return a.cloudLLMModelService.Create(model)
 }
 
 // UpdateCloudLLMModel 更新云端模型
 func (a *App) UpdateCloudLLMModel(model *models.CloudLLMModel) error {
-    return a.cloudLLMModelService.Update(model)
+	return a.cloudLLMModelService.Update(model)
 }
 
 // DeleteCloudLLMModel 删除云端模型
 func (a *App) DeleteCloudLLMModel(id uint) error {
-    return a.cloudLLMModelService.Delete(id)
+	return a.cloudLLMModelService.Delete(id)
 }
 
 // ToggleCloudLLMModelEnabled 切换云端模型启用状态
 func (a *App) ToggleCloudLLMModelEnabled(id uint, enabled bool) error {
-    return a.cloudLLMModelService.ToggleEnabled(id, enabled)
+	return a.cloudLLMModelService.ToggleEnabled(id, enabled)
 }
 
 // ----------------------------- 会话相关API -----------------------------
 
 // GetConversationList 分页查询会话列表
 func (a *App) GetConversationList(page, size int, search string) (*services.ConversationPageResult, error) {
-    return a.conversationService.GetList(page, size, search)
+	return a.conversationService.GetList(page, size, search)
 }
 
 // ----------------------------- 聊天相关API -----------------------------
 
 // GetMessageList 获取历史消息记录
 func (a *App) GetMessageList(conversationId, minId, size int) (*services.MessagePageResult, error) {
-    return a.messageService.GetList(conversationId, minId, size)
+	return a.messageService.GetList(conversationId, minId, size)
 }
 
 // StreamRequestMessage 给大模型发消息
-func (a *App) StreamRequestMessage(params services.MessageRequestParams) error {
-    return a.messageService.Request(params)
+func (a *App) StreamRequestMessage(params services.MessageRequestParams) (int64, error) {
+	return a.messageService.Request(params)
 }
