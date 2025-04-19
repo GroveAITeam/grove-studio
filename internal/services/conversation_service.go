@@ -54,3 +54,11 @@ func (n *ConversationService) GetList(page, size int, search string) (*Conversat
 		Items: items,
 	}, nil
 }
+
+// Destroy 删除会话
+func (n *ConversationService) Destroy(id int) error {
+	if err := database.DB.Delete(&models.Conversation{}, "id = ?", id).Error; err != nil {
+		return err
+	}
+	return nil
+}

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {ref, reactive, onMounted, computed, watch, nextTick} from 'vue'
+import {ref, reactive, onMounted, computed, watch, nextTick, onUnmounted} from 'vue'
 import ConversationList from '../../components/chat/ConversationList.vue';
 import ChatHeader from '../../components/chat/ChatHeader.vue';
 import ChatMessages from '../../components/chat/ChatMessages.vue';
@@ -316,9 +316,10 @@ watch(messages, async () => {
   await scrollToBottom();
 }, {deep: true});
 
-// 只注册一次流式消息监听
 // 用于缓存分片内容
-const streamChunks = ref<string[]>([]);
+const streamChunks = ref<Map<number, string>>(new Map());
+const pendingDone = ref<boolean>(false);
+const doneTimeout = ref<number | null>(null);
 
 EventsOn("stream-request-message", (data) => {
   // data.index: 当前分片序号
@@ -338,28 +339,51 @@ EventsOn("stream-request-message", (data) => {
 
   if (lastMessage) {
     try {
-      // 确保数组长度足够
-      while (streamChunks.value.length <= data.index) {
-        streamChunks.value.push('');
-      }
-      // 存储当前分片
-      streamChunks.value[data.index] = data.content || '';
-
-      // 拼接所有内容
-      lastMessage.content = streamChunks.value.join('');
-
-      // 添加内容后定期滚动到底部
-      if (lastMessage.content.length % 10 === 0) {
-        scrollToBottom();
-      }
-
-      // 如果流式结束，清空缓存
+      // 如果收到done信号，设置延迟清理标记
       if (data.done) {
-        streamChunks.value = [];
+        pendingDone.value = true;
+        // 清除之前的定时器
+        if (doneTimeout.value) {
+          clearTimeout(doneTimeout.value);
+        }
+        // 设置新的定时器，延迟200ms清理
+        doneTimeout.value = setTimeout(() => {
+          streamChunks.value.clear();
+          pendingDone.value = false;
+          doneTimeout.value = null;
+        }, 200) as unknown as number;
+        return;
+      }
+
+      // 处理内容
+      if (data.content) {
+        streamChunks.value.set(data.index, data.content);
+
+        // 重新构建内容
+        lastMessage.content = '';
+        const sortedIndices = Array.from(streamChunks.value.keys()).sort((a, b) => a - b);
+        for (const index of sortedIndices) {
+          const chunk = streamChunks.value.get(index);
+          if (chunk) {
+            lastMessage.content += chunk;
+          }
+        }
+
+        // 添加内容后定期滚动到底部
+        if (lastMessage.content.length % 10 === 0) {
+          scrollToBottom();
+        }
       }
     } catch (error) {
       console.error('处理流式消息出错:', error);
     }
+  }
+});
+
+// 在组件卸载时清理定时器
+onUnmounted(() => {
+  if (doneTimeout.value) {
+    clearTimeout(doneTimeout.value);
   }
 });
 
