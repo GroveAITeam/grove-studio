@@ -112,6 +112,7 @@ func (n *MessageService) getModelAndConversation(params MessageRequestParams) (m
 			return cloudLLM, conversation, historyMessages, err
 		}
 	} else {
+		conversation.Title = params.Question
 		if err := database.DB.Create(&conversation).Error; err != nil {
 			return cloudLLM, conversation, historyMessages, err
 		}
