@@ -111,6 +111,7 @@ export namespace models {
 	    created_at: any;
 	    // Go type: time
 	    updated_at: any;
+	    conversation_id: number;
 	    role: string;
 	    content: string;
 	
@@ -123,6 +124,7 @@ export namespace models {
 	        this.id = source["id"];
 	        this.created_at = this.convertValues(source["created_at"], null);
 	        this.updated_at = this.convertValues(source["updated_at"], null);
+	        this.conversation_id = source["conversation_id"];
 	        this.role = source["role"];
 	        this.content = source["content"];
 	    }
@@ -249,6 +251,9 @@ export namespace services {
 	    conversation_id: number;
 	    question: string;
 	    model_name: string;
+	    temperature: number;
+	    max_completion_tokens: number;
+	    history_length: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new MessageRequestParams(source);
@@ -260,6 +265,9 @@ export namespace services {
 	        this.conversation_id = source["conversation_id"];
 	        this.question = source["question"];
 	        this.model_name = source["model_name"];
+	        this.temperature = source["temperature"];
+	        this.max_completion_tokens = source["max_completion_tokens"];
+	        this.history_length = source["history_length"];
 	    }
 	}
 

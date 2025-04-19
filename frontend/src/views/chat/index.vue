@@ -9,20 +9,8 @@ import OpenAI from "openai";
 import {GetCloudLLMModels} from '../../../wailsjs/go/main/App';
 import {useToast} from "../../utils/toast";
 import {LLM_PROVIDERS} from '../../constants/LLMProviders';
-
-// 测试golang流式输出
 import { EventsOn } from '../../../wailsjs/runtime';
 import {StreamRequestMessage} from "../../../wailsjs/go/main/App";
-EventsOn("stream-request-message", (data) => {
-  console.log(data)
-})
-
-StreamRequestMessage({
-  cloud_llm_id: 1,
-  conversation_id: 1,
-  question: "你好",
-  model_name: "gpt-4.1",
-}).then(() => {})
 
 const toast = useToast();
 let client: OpenAI | null = null;
@@ -201,40 +189,6 @@ const sendOpenAIRequest = async (userInput: string) => {
       return;
     }
 
-    // 更新client配置，确保每次请求使用正确的endpoint和API key
-    client.baseURL = modelConfig.endpoint;
-    client.apiKey = modelConfig.api_key;
-
-    // 确保上下文长度是数字
-    const contextLength = Number(settings.contextLength);
-
-    const history = messages.value.slice(-contextLength).map(msg => ({
-      role: msg.type,
-      content: msg.content
-    }));
-
-    history.push({
-      role: 'user',
-      content: userInput
-    });
-
-    // 准备请求参数
-    const requestParams: any = {
-      model: modelName,
-      messages: history,
-      temperature: Number(settings.temperature),
-      stream: true,
-    };
-
-    // 只有在非"完整"模式下才传递max_tokens参数
-    const maxTokensValue = Number(settings.maxTokens);
-    if (maxTokensValue <= 3500) {
-      requestParams.max_tokens = maxTokensValue;
-    }
-
-    // 发送请求
-    const streamResponse = await client.chat.completions.create(requestParams);
-
     // 添加助手消息（带有typing标记）
     messages.value.push({
       type: 'assistant',
@@ -245,19 +199,25 @@ const sendOpenAIRequest = async (userInput: string) => {
     // 确保消息添加后滚动到底部
     await scrollToBottom();
 
-    // 处理流式响应
-    for await (const chunk of streamResponse as any) {
+    EventsOn("stream-request-message", async (data) => {
+      console.log(data)
       const lastMessage = messages.value[messages.value.length - 1];
-      const content = chunk.choices[0]?.delta?.content || '';
-
-      if (content) {
-        lastMessage.content += content;
-        // 添加内容后定期滚动到底部
-        if (lastMessage.content.length % 10 === 0) {
-          await scrollToBottom();
-        }
+      lastMessage.content += data.content;
+      // 添加内容后定期滚动到底部
+      if (lastMessage.content.length % 10 === 0) {
+        await scrollToBottom();
       }
-    }
+    })
+
+    StreamRequestMessage({
+      cloud_llm_id: modelConfig.id,
+      conversation_id: 0,
+      question: userInput,
+      model_name: modelName,
+      temperature: Number(settings.temperature),
+      max_completion_tokens: settings.maxTokens,
+      history_length: Number(settings.contextLength),
+    }).then((totalToken) => {console.log("token消耗量为" + totalToken)})
 
     // 流式输出完成，移除typing标记
     const lastMessage = messages.value[messages.value.length - 1];

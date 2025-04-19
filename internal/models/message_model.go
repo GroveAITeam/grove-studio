@@ -2,6 +2,7 @@ package models
 
 type Message struct {
 	BaseModel
-	Role    string `json:"role"`
-	Content string `json:"content"`
+	ConversationID uint   `json:"conversation_id"`
+	Role           string `json:"role"`
+	Content        string `json:"content"`
 }
