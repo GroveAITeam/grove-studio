@@ -14,11 +14,15 @@ export function GetCloudLLMModelByID(arg1:number):Promise<models.CloudLLMModel>;
 
 export function GetCloudLLMModels(arg1:number,arg2:number):Promise<services.CloudLLMModelPageResult>;
 
+export function GetConversationList(arg1:number,arg2:number,arg3:string):Promise<services.ConversationPageResult>;
+
+export function GetMessageList(arg1:number,arg2:number,arg3:number):Promise<services.MessagePageResult>;
+
 export function GetSetting(arg1:string):Promise<string>;
 
-export function SendMessageStream(arg1:string):Promise<void>;
-
 export function SetSetting(arg1:string,arg2:string):Promise<void>;
+
+export function StreamRequestMessage(arg1:services.MessageRequestParams):Promise<void>;
 
 export function ToggleCloudLLMModelEnabled(arg1:number,arg2:boolean):Promise<void>;
 

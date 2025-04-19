@@ -10,15 +10,19 @@ import {GetCloudLLMModels} from '../../../wailsjs/go/main/App';
 import {useToast} from "../../utils/toast";
 import {LLM_PROVIDERS} from '../../constants/LLMProviders';
 
-
 // 测试golang流式输出
 import { EventsOn } from '../../../wailsjs/runtime';
-import {SendMessageStream} from "../../../wailsjs/go/main/App";
-EventsOn("stream-message", (data) => {
+import {StreamRequestMessage} from "../../../wailsjs/go/main/App";
+EventsOn("stream-request-message", (data) => {
   console.log(data)
 })
 
-SendMessageStream("hello").then(() => {})
+StreamRequestMessage({
+  cloud_llm_id: 1,
+  conversation: 1,
+  question: "你好",
+  model_name: "gpt-4.1",
+}).then(() => {})
 
 const toast = useToast();
 let client: OpenAI | null = null;

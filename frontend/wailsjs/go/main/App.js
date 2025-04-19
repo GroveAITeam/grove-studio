@@ -22,16 +22,24 @@ export function GetCloudLLMModels(arg1, arg2) {
   return window['go']['main']['App']['GetCloudLLMModels'](arg1, arg2);
 }
 
+export function GetConversationList(arg1, arg2, arg3) {
+  return window['go']['main']['App']['GetConversationList'](arg1, arg2, arg3);
+}
+
+export function GetMessageList(arg1, arg2, arg3) {
+  return window['go']['main']['App']['GetMessageList'](arg1, arg2, arg3);
+}
+
 export function GetSetting(arg1) {
   return window['go']['main']['App']['GetSetting'](arg1);
 }
 
-export function SendMessageStream(arg1) {
-  return window['go']['main']['App']['SendMessageStream'](arg1);
-}
-
 export function SetSetting(arg1, arg2) {
   return window['go']['main']['App']['SetSetting'](arg1, arg2);
+}
+
+export function StreamRequestMessage(arg1) {
+  return window['go']['main']['App']['StreamRequestMessage'](arg1);
 }
 
 export function ToggleCloudLLMModelEnabled(arg1, arg2) {
