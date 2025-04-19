@@ -8,6 +8,8 @@ export function CreateCloudLLMModel(arg1:models.CloudLLMModel):Promise<void>;
 
 export function DeleteCloudLLMModel(arg1:number):Promise<void>;
 
+export function DestroyConversation(arg1:number):Promise<void>;
+
 export function GetAppConfig():Promise<config.AppConfig>;
 
 export function GetCloudLLMModelByID(arg1:number):Promise<models.CloudLLMModel>;

@@ -10,6 +10,10 @@ export function DeleteCloudLLMModel(arg1) {
   return window['go']['main']['App']['DeleteCloudLLMModel'](arg1);
 }
 
+export function DestroyConversation(arg1) {
+  return window['go']['main']['App']['DestroyConversation'](arg1);
+}
+
 export function GetAppConfig() {
   return window['go']['main']['App']['GetAppConfig']();
 }

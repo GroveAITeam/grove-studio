@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/openai/openai-go/packages/ssestream"
 	"grove-studio/internal/database"
 	"grove-studio/internal/models"
 	"grove-studio/internal/utils"
+	"unicode/utf8"
+
+	"github.com/openai/openai-go/packages/ssestream"
 
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
@@ -44,7 +46,7 @@ type MessagePageResult struct {
 // GetList 获取消息列表
 func (n *MessageService) GetList(conversationId, minId, size int) (*MessagePageResult, error) {
 	minId = max(minId, 0)
-	size = max(size, 20)
+	size = max(size, 10)
 
 	if conversationId < 0 {
 		return nil, errors.New("会话ID不能为空")
@@ -55,11 +57,20 @@ func (n *MessageService) GetList(conversationId, minId, size int) (*MessagePageR
 		Model(&models.Message{}).
 		Where("conversation_id = ?", conversationId)
 	if minId > 0 {
-		db = db.Where("min_id < ?", minId)
+		db = db.Where("id < ?", minId)
 	}
-	if err := db.Limit(size).Find(&items).Error; err != nil {
+	if err := db.Order("id desc").Limit(size).Find(&items).Error; err != nil {
 		n.logger.Error("消息列表获取失败: %v", err)
 		return nil, err
+	}
+
+	// 查询后反转
+	for i, j := 0, len(items)-1; i < j; i, j = i+1, j-1 {
+		items[i], items[j] = items[j], items[i]
+	}
+
+	if len(items) == 0 {
+		return &MessagePageResult{Items: []models.Message{}}, nil
 	}
 
 	return &MessagePageResult{Items: items}, nil
@@ -112,7 +123,15 @@ func (n *MessageService) getModelAndConversation(params MessageRequestParams) (m
 			return cloudLLM, conversation, historyMessages, err
 		}
 	} else {
-		conversation.Title = params.Question
+		// 限制标题长度，避免过长的问题
+		title := params.Question
+		// 使用utf8.RuneCountInString正确计算包含中文在内的字符数
+		if utf8.RuneCountInString(title) > 100 {
+			// 截取前100个Unicode字符
+			runes := []rune(title)
+			title = string(runes[:100]) + "..."
+		}
+		conversation.Title = title
 		if err := database.DB.Create(&conversation).Error; err != nil {
 			return cloudLLM, conversation, historyMessages, err
 		}

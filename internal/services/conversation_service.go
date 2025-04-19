@@ -44,7 +44,7 @@ func (n *ConversationService) GetList(page, size int, search string) (*Conversat
 	}
 
 	// 分页查询
-	if err := db.Offset((page - 1) * size).Limit(size).Find(&items).Error; err != nil {
+	if err := db.Offset((page - 1) * size).Order("id desc").Limit(size).Find(&items).Error; err != nil {
 		n.logger.Error("分页查询会话列表失败: %v", err)
 		return nil, err
 	}
