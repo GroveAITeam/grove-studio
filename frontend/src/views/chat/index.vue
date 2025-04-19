@@ -206,7 +206,7 @@ const sendOpenAIRequest = async (userInput: string) => {
       question: userInput,
       model_name: modelName,
       temperature: Number(settings.temperature),
-      max_completion_tokens: settings.maxTokens,
+      max_completion_tokens: Number(settings.contextLength) <= 3500 ? 0 : Number(settings.contextLength),
       history_length: Number(settings.contextLength),
     }).then((totalToken) => {console.log("token消耗量为" + totalToken)})
 
