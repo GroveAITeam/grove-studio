@@ -251,3 +251,7 @@ const config = await window.go.main.App.GetAppConfig();
 - 数据库文件：`~/.grove-studio/data/grove.db`
 - 日志文件：`~/.grove-studio/logs/app.log`
 
+## 维护者
+
+This project is maintained by Xiangfei Ai.
+
