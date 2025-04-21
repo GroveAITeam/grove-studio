@@ -7,3 +7,4 @@ frontend/dist
 .idea/
 *.iml
 grove-studio-res.syso
+wailsjs/
