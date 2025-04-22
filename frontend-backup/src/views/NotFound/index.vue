@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Layout from '@/components/common/Layout.vue'
 import { Button } from '@/components/ui/button'
 import { navigator } from '@/router/navigator'
 
@@ -8,11 +9,13 @@ const back = () => {
 </script>
 
 <template>
-  <div class="not-found-container">
-    <h1 class="not-found-title">404</h1>
-    <p class="not-found-message">抱歉，您访问的页面不存在</p>
-    <Button @click="back">返回首页</Button>
-  </div>
+  <Layout>
+    <div class="not-found-container">
+      <h1 class="not-found-title">404</h1>
+      <p class="not-found-message">抱歉，您访问的页面不存在</p>
+      <Button @click="back">返回首页</Button>
+    </div>
+  </Layout>
 </template>
 
 <style scoped>

@@ -1,18 +1,23 @@
 <script setup lang="ts">
+import Layout from '@/components/common/Layout.vue'
 </script>
 
 <template>
-  <div class="home-container">
-    Grove Home
-  </div>
+  <Layout>
+    <template #header>
+      <h1>Grove Stadio</h1>
+    </template>
+    <view class="home">
+      chat page
+    </view>
+  </Layout>
 </template>
 
 <style scoped>
-.home-container {
+.home {
+  width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
-  align-items: center;
-  height: 100vh;
-  width: 100vh;
 }
 </style>
