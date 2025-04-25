@@ -1,0 +1,1 @@
+import{_ as e}from"./_plugin-vue_export-helper-DlAUqK2U.js";import{c,o}from"./index-BPGyjDs_.js";const t={},s={class:"home"};function a(r,_){return o(),c("view",s," chat page ")}const d=e(t,[["render",a],["__scopeId","data-v-7f1f5698"]]);export{d as default};

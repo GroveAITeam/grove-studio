@@ -1,15 +1,39 @@
-import { createRouter, createWebHashHistory } from "vue-router";
-import Chat from "../views/chat/index.vue";
+import { createRouter, createWebHistory } from 'vue-router'
 
-const router = createRouter({
-    history: createWebHashHistory(),
-    routes: [
-        { path: "/", name: "Grove Studio", component: Chat },
-        { path: "/llm", name: '对话模型', component: () => import("../views/llm/LLM.vue") },
-        { path: "/llm/local", name: '本地模型', component: () => import("../views/llm/Local.vue") },
-        { path: "/llm/cloud", name: '云端模型', component: () => import("../views/llm/Cloud.vue") },
-        { path: "/setting", name: '设置', component: () => import("../views/settings/index.vue") },
-    ],
-});
+// 路由配置
+const routes = [
+  {
+    path: '/',
+    name: 'Home',
+    component: () => import('../views/Home/index.vue'),
+    meta: {
+      title: '首页',
+      keepAlive: true,
+    },
+  },
+  // 404页面
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: () => import('@/views/NotFound/index.vue'),
+    meta: {
+      title: '404',
+      keepAlive: false,
+    },
+  },
+]
 
-export default router;
+// 创建路由实例
+export const router = createRouter({
+  history: createWebHistory(),
+  routes,
+})
+
+// 路由前置守卫
+router.beforeEach((to, from, next) => {
+  // TODO
+  console.log(to, from,)
+  next()
+})
+
+export default router
