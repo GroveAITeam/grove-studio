@@ -13,7 +13,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "lint:fix": "node scripts/lint-fix.js",
-    "prepare": "husky"
+    "prepare": "husky install"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.4",
@@ -21,6 +21,7 @@
     "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "husky": "^7.0.4",
     "lucide-vue-next": "^0.501.0",
     "pinia": "^3.0.2",
     "reka-ui": "^2.2.0",
@@ -39,7 +40,6 @@
     "@vue/tsconfig": "^0.7.0",
     "eslint": "^9.24.0",
     "eslint-plugin-format": "^1.0.1",
-    "husky": "^9.1.7",
     "lint-staged": "^15.5.1",
     "sass-embedded": "^1.87.0",
     "typescript": "~5.7.2",
