@@ -32,7 +32,7 @@ export const router = createRouter({
 // 路由前置守卫
 router.beforeEach((to, from, next) => {
   // TODO
-  console.log(to, from,)
+  console.log(to, from)
   next()
 })
 

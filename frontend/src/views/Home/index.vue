@@ -4,7 +4,9 @@
 <template>
   <view class="home">
     chat page
-                  <p></p>
+    <p>
+      wee
+    </p>
   </view>
 </template>
 
