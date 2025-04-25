@@ -5,8 +5,13 @@
   <view class="home">
     chat page
     <p>
-      wee
-    </p>
+               23wee
+    
+    
+    
+    
+    
+              </p>
   </view>
 </template>
 
