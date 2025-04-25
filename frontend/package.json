@@ -46,6 +46,11 @@
     "vite": "^6.3.1",
     "vue-tsc": "^2.2.8"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
   "lint-staged": {
     "src/**/*.{vue,js,ts,jsx,tsx}": [
       "npm run lint:fix",
