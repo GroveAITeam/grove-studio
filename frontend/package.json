@@ -12,7 +12,8 @@
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "lint:fix": "node scripts/lint-fix.js"
+    "lint:fix": "node scripts/lint-fix.js",
+    "prepare": "husky"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.4",
@@ -31,14 +32,30 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.12.0",
+    "@commitlint/cli": "^19.8.0",
+    "@commitlint/config-conventional": "^19.8.0",
     "@types/node": "^22.14.1",
     "@vitejs/plugin-vue": "^5.2.2",
     "@vue/tsconfig": "^0.7.0",
     "eslint": "^9.24.0",
     "eslint-plugin-format": "^1.0.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.1",
     "sass-embedded": "^1.87.0",
     "typescript": "~5.7.2",
     "vite": "^6.3.1",
     "vue-tsc": "^2.2.8"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.{vue,js,ts,jsx,tsx}": [
+      "npm run lint:fix",
+      "vue-tsc --noEmit",
+      "git add ."
+    ]
   }
 }

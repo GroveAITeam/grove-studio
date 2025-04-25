@@ -4,6 +4,7 @@
 <template>
   <view class="home">
     chat page
+                  <p></p>
   </view>
 </template>
 
