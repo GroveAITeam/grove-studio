@@ -3,14 +3,5 @@
 
 cd frontend
 
-# 加载 nvm
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-nvm use
-
-# 设置 PATH（确保 nvm current 能返回正确版本）
-export PATH="$HOME/.nvm/versions/node/$(nvm current)/bin:$PATH"
-
-
 npx -v
 npx lint-staged

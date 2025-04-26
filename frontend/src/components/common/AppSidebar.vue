@@ -37,13 +37,13 @@ const content = [
   },
   {
     title: '对话模型',
-    url: '/model',
+    url: '/LLM/index',
     icon: Bot,
   },
 ]
 const footer = {
   title: '设置',
-  url: '/settings',
+  url: '/setting',
   icon: Settings2,
 }
 const header = {
@@ -60,7 +60,7 @@ const handelPath = (path: string) => {
 <template>
   <Sidebar v-bind="props">
     <SidebarHeader>
-      <SidebarMenuButton :tooltip="header.title" @click="handelPath(header.url)">
+      <SidebarMenuButton class="cursor-pointer" :tooltip="header.title" @click="handelPath(header.url)">
         <img class="w-[16px] h-[16px]" :src="Logo">
         <span>{{ header.title }}</span>
       </SidebarMenuButton>
@@ -69,7 +69,7 @@ const handelPath = (path: string) => {
       <NavMain :items="content" />
     </SidebarContent>
     <SidebarFooter>
-      <SidebarMenuButton :tooltip="footer.title" @click="handelPath(footer.url)">
+      <SidebarMenuButton class="cursor-pointer" :tooltip="footer.title" @click="handelPath(footer.url)">
         <component :is="footer.icon" v-if="footer.icon" />
         <span>{{ footer.title }}</span>
       </SidebarMenuButton>

@@ -29,7 +29,7 @@ const handelPath = (path: string) => {
         v-for="item in items"
         :key="item.title"
       >
-        <SidebarMenuButton :tooltip="item.title" @click="handelPath(item.url)">
+        <SidebarMenuButton class="cursor-pointer" :tooltip="item.title" @click="handelPath(item.url)">
           <component :is="item.icon" v-if="item.icon" />
           <span>{{ item.title }}</span>
         </SidebarMenuButton>

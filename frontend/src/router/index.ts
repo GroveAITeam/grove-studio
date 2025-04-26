@@ -4,11 +4,35 @@ import { createRouter, createWebHistory } from 'vue-router'
 const routes = [
   {
     path: '/',
-    name: 'Home',
-    component: () => import('../views/Home/index.vue'),
+    name: 'Chat',
+    component: () => import('../views/Chat/index.vue'),
     meta: {
-      title: '首页',
+      title: '对话首页',
       keepAlive: true,
+    },
+  },
+  {
+    path: '/llm/index',
+    name: 'LLMIndex',
+    component: () => import('../views/LLM/index.vue'),
+    meta: {
+      title: '对话模型',
+    },
+  },
+  {
+    path: '/llm/cloud',
+    name: 'LLMCloud',
+    component: () => import('../views/LLM/Cloud.vue'),
+    meta: {
+      title: '云端模型',
+    },
+  },
+  {
+    path: '/setting',
+    name: 'setting',
+    component: () => import('../views/Setting/index.vue'),
+    meta: {
+      title: '设置页',
     },
   },
   // 404页面
@@ -32,7 +56,7 @@ export const router = createRouter({
 // 路由前置守卫
 router.beforeEach((to, from, next) => {
   // TODO
-  console.log(to, from)
+  // console.log(to, from)
   next()
 })
 
