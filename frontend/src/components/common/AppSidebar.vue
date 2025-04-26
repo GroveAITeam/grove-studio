@@ -59,18 +59,18 @@ const handelPath = (path: string) => {
 
 <template>
   <Sidebar v-bind="props">
-    <SidebarHeader>
+    <SidebarHeader class="items-center justify-center mt-8">
       <SidebarMenuButton class="cursor-pointer" :tooltip="header.title" @click="handelPath(header.url)">
-        <img class="w-[16px] h-[16px]" :src="Logo">
+        <img style="width: 24px;height: 24px;" :src="Logo">
         <span>{{ header.title }}</span>
       </SidebarMenuButton>
     </SidebarHeader>
-    <SidebarContent>
+    <SidebarContent >
       <NavMain :items="content" />
     </SidebarContent>
-    <SidebarFooter>
+    <SidebarFooter class="items-center justify-center">
       <SidebarMenuButton class="cursor-pointer" :tooltip="footer.title" @click="handelPath(footer.url)">
-        <component :is="footer.icon" v-if="footer.icon" />
+        <component  style="width: 24px;height: 24px;"  :is="footer.icon" v-if="footer.icon" />
         <span>{{ footer.title }}</span>
       </SidebarMenuButton>
     </SidebarFooter>
