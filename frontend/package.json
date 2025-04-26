@@ -12,6 +12,7 @@
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
+    "test": "vue-tsc --noEmit",
     "lint:fix": "node scripts/lint-fix.js"
   },
   "dependencies": {
@@ -53,7 +54,6 @@
   "lint-staged": {
     "src/**/*.{vue,js,ts,jsx,tsx}": [
       "npm run lint:fix",
-      "vue-tsc --noEmit",
       "git add ."
     ]
   }
