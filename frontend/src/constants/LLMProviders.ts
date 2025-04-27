@@ -1,39 +1,50 @@
+import baichuan from '/src/assets/images/providers/baichuan.png'
+import baidu from '/src/assets/images/providers/baidu.png'
+import cohere from '/src/assets/images/providers/cohere.png'
+import deepseek from '/src/assets/images/providers/deepseek.png'
+import gemini from '/src/assets/images/providers/gemini.png'
+import hunyuan from '/src/assets/images/providers/hunyuan.png'
+import huoshan from '/src/assets/images/providers/huoshan.png'
+import kimi from '/src/assets/images/providers/kimi.png'
 // LLM提供商相关常量信息
+import openai from '/src/assets/images/providers/openai.png'
+import tongyi from '/src/assets/images/providers/tongyi.png'
+
 export interface ProviderInfo {
-  id: string;
-  name: string;
-  icon: string;
-  endpoint: string;
-  models: string[];
+  id: string
+  name: string
+  icon: string
+  endpoint: string
+  models: string[]
 }
 
 // LLM提供商列表
-export const LLM_PROVIDERS: ProviderInfo[] =  [
+export const LLM_PROVIDERS: ProviderInfo[] = [
   {
     id: 'openai',
     name: 'OpenAI',
-    icon: '/src/assets/images/providers/openai.png',
+    icon: openai,
     endpoint: 'https://api.openai.com/v1',
     models: [
       'gpt-4o',
       'gpt-4o-mini',
       'gpt-4.1',
-    ]
+    ],
   },
   {
     id: 'deepseek',
     name: 'DeepSeek',
-    icon: '/src/assets/images/providers/deepseek.png',
+    icon: deepseek,
     endpoint: 'https://api.deepseek.com/v1',
     models: [
       'deepseek-chat',
       'deepseek-reasoner',
-    ]
+    ],
   },
   {
     id: 'siliconflow',
     name: '硅基流动(siliconflow)',
-    icon: '/src/assets/images/providers/deepseek.png',
+    icon: deepseek,
     endpoint: 'https://api.siliconflow.cn/v1',
     models: [
       'THUDM/GLM-Z1-32B-0414',
@@ -57,7 +68,7 @@ export const LLM_PROVIDERS: ProviderInfo[] =  [
   {
     id: 'baidu',
     name: '百度',
-    icon: '/src/assets/images/providers/baidu.png',
+    icon: baidu,
     endpoint: 'https://qianfan.baidubce.com/v2',
     models: [
       'ernie-x1-32k',
@@ -68,12 +79,12 @@ export const LLM_PROVIDERS: ProviderInfo[] =  [
       'ernie-3.5-128k',
       'deepseek-v3',
       'deepseek-r1',
-    ]
+    ],
   },
   {
     id: 'tongyi',
     name: '通义千问',
-    icon: '/src/assets/images/providers/tongyi.png',
+    icon: tongyi,
     endpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
     models: [
       'qwen-max',
@@ -85,7 +96,7 @@ export const LLM_PROVIDERS: ProviderInfo[] =  [
   {
     id: 'hunyuan',
     name: '腾讯混元',
-    icon: '/src/assets/images/providers/hunyuan.png',
+    icon: hunyuan,
     endpoint: 'https://api.hunyuan.cloud.tencent.com/v1',
     models: [
       'hunyuan-lite',
@@ -99,7 +110,7 @@ export const LLM_PROVIDERS: ProviderInfo[] =  [
   {
     id: 'huoshan',
     name: '火山引擎',
-    icon: '/src/assets/images/providers/huoshan.png',
+    icon: huoshan,
     endpoint: 'https://ark.cn-beijing.volces.com/api/v3/',
     models: [
       'doubao-1-5-pro-32k-250115',
@@ -112,7 +123,7 @@ export const LLM_PROVIDERS: ProviderInfo[] =  [
   {
     id: 'gemini',
     name: 'Google Gemini',
-    icon: '/src/assets/images/providers/gemini.png',
+    icon: gemini,
     endpoint: 'https://generativelanguage.googleapis.com/v1beta/openai/',
     models: [
       'gemini-2.0-flash',
@@ -124,7 +135,7 @@ export const LLM_PROVIDERS: ProviderInfo[] =  [
   {
     id: 'spark',
     name: '讯飞星火',
-    icon: '/src/assets/images/providers/gemini.png',
+    icon: gemini,
     endpoint: 'https://spark-api-open.xf-yun.com/v1',
     models: [
       'x1',
@@ -140,7 +151,7 @@ export const LLM_PROVIDERS: ProviderInfo[] =  [
   {
     id: 'cohere',
     name: 'cohere',
-    icon: '/src/assets/images/providers/cohere.png',
+    icon: cohere,
     endpoint: 'https://api.cohere.ai/compatibility/v1',
     models: [
       'command-r-plus',
@@ -152,7 +163,7 @@ export const LLM_PROVIDERS: ProviderInfo[] =  [
   {
     id: 'kimi',
     name: 'Kimi',
-    icon: '/src/assets/images/providers/kimi.png',
+    icon: kimi,
     endpoint: 'https://api.moonshot.cn/v1',
     models: [
       'kimi-latest-8k',
@@ -166,7 +177,7 @@ export const LLM_PROVIDERS: ProviderInfo[] =  [
   {
     id: 'baichuan',
     name: '百川智能',
-    icon: '/src/assets/images/providers/baichuan.png',
+    icon: baichuan,
     endpoint: 'https://api.baichuan-ai.com/v1',
     models: [
       'Baichuan4-Turbo',
@@ -177,21 +188,21 @@ export const LLM_PROVIDERS: ProviderInfo[] =  [
       'Baichuan2-Turbo',
     ],
   },
-];
+]
 
 // 根据提供商ID获取提供商信息
 export function getProviderById(providerId: string): ProviderInfo | undefined {
-  return LLM_PROVIDERS.find(provider => provider.id === providerId);
+  return LLM_PROVIDERS.find(provider => provider.id === providerId)
 }
 
 // 获取提供商图标
 export function getProviderIcon(providerId: string): string {
-  const provider = getProviderById(providerId);
-  return provider ? provider.icon : '/assets/images/providers/default.png';
+  const provider = getProviderById(providerId)
+  return provider ? provider.icon : '/assets/images/providers/default.png'
 }
 
 // 根据提供商ID获取可用模型列表
 export function getProviderModels(providerId: string): string[] {
-  const provider = getProviderById(providerId);
-  return provider ? provider.models : [];
+  const provider = getProviderById(providerId)
+  return provider ? provider.models : []
 }

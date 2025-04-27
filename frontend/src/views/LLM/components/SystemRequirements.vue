@@ -1,25 +1,25 @@
 <script lang="ts" setup>
 interface Spec {
-  icon: string;
-  name: string;
-  compatible: boolean;
+  icon: string
+  name: string
+  compatible: boolean
 }
 
 interface Compatibility {
-  status: string;
-  text: string;
-  specs: Spec[];
+  status: string
+  text: string
+  specs: Spec[]
 }
 
 interface ModelInfo {
-  size: string;
-  description: string;
-  compatibility: Compatibility;
+  size: string
+  description: string
+  compatibility: Compatibility
 }
 
 defineProps<{
-  modelInfo: ModelInfo;
-}>();
+  modelInfo: ModelInfo
+}>()
 </script>
 
 <template>
@@ -31,10 +31,11 @@ defineProps<{
     <div class="bg-base-100/50 rounded-md p-3">
       <div class="flex items-center justify-between">
         <span>您当前设备</span>
-        <span :class="[
-          modelInfo.compatibility.status === 'compatible' ? 'bg-success/20 text-success' : 'bg-error/20 text-error',
-          'px-2 py-1 rounded text-xs'
-        ]">
+        <span
+          class="px-2 py-1 rounded text-xs" :class="[
+            modelInfo.compatibility.status === 'compatible' ? 'bg-success/20 text-success' : 'bg-error/20 text-error',
+          ]"
+        >
           {{ modelInfo.compatibility.text }}
         </span>
       </div>

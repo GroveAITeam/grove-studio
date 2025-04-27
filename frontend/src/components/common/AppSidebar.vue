@@ -65,12 +65,12 @@ const handelPath = (path: string) => {
         <span>{{ header.title }}</span>
       </SidebarMenuButton>
     </SidebarHeader>
-    <SidebarContent >
+    <SidebarContent>
       <NavMain :items="content" />
     </SidebarContent>
     <SidebarFooter class="items-center justify-center">
       <SidebarMenuButton class="cursor-pointer" :tooltip="footer.title" @click="handelPath(footer.url)">
-        <component  style="width: 24px;height: 24px;"  :is="footer.icon" v-if="footer.icon" />
+        <component :is="footer.icon" v-if="footer.icon" style="width: 24px;height: 24px;" />
         <span>{{ footer.title }}</span>
       </SidebarMenuButton>
     </SidebarFooter>

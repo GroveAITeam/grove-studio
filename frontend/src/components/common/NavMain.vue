@@ -31,7 +31,7 @@ const handelPath = (path: string) => {
         class="flex items-center justify-center mt-3"
       >
         <SidebarMenuButton class="cursor-pointer" :tooltip="item.title" @click="handelPath(item.url)">
-          <component style="width: 24px;height: 24px;" :is="item.icon" v-if="item.icon" />
+          <component :is="item.icon" v-if="item.icon" style="width: 24px;height: 24px;" />
           <span>{{ item.title }}</span>
         </SidebarMenuButton>
       </SidebarMenuItem>

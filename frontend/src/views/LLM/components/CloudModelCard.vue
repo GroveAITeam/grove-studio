@@ -1,14 +1,14 @@
 <script lang="ts" setup>
-import { useRouter } from 'vue-router';
-import { LLM_PROVIDERS } from '@/constants/LLMProviders';
 import { Button } from '@/components/ui/button'
+import { LLM_PROVIDERS } from '@/constants/LLMProviders'
+import { useRouter } from 'vue-router'
 
-const router = useRouter();
+const router = useRouter()
 
 // 跳转到云端模型配置页面
 const goToCloudModel = () => {
-  router.push('/llm/cloud');
-};
+  router.push('/llm/cloud')
+}
 </script>
 
 <template>
@@ -52,7 +52,7 @@ const goToCloudModel = () => {
         <span>需要您自行提供API密钥</span>
       </div>
 
-      <Button  @click="goToCloudModel">开始配置</Button>
+      <Button @click="goToCloudModel">开始配置</Button>
     </div>
   </div>
 </template>

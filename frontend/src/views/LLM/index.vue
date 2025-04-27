@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import CloudModelCard from '@/views/LLM/components/CloudModelCard.vue'
-import LocalModelCard from '@/views/LLM/components/LocalModelCard.vue';
+import LocalModelCard from '@/views/LLM/components/LocalModelCard.vue'
 </script>
 
 <template>
   <div class="flex flex-col p-8 gap-4">
-    <div class=" text-base-content border border-base-300/50 p-2 rounded-lg flex items-center justify-center " >模型配置</div>
+    <div class=" text-base-content border border-base-300/50 p-2 rounded-lg flex items-center justify-center ">模型配置</div>
     <!-- 顶部提示 -->
     <div class=" text-base-content border border-base-300/50 flex items-center gap-3 rounded-lg p-2">
       <div class="text-lg">💡</div>

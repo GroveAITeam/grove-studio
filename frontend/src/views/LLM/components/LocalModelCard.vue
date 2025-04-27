@@ -1,14 +1,14 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
-import ModelSizeSelector from './ModelSizeSelector.vue';
-import SystemRequirements from './SystemRequirements.vue';
+import { ref } from 'vue'
+import ModelSizeSelector from './ModelSizeSelector.vue'
+import SystemRequirements from './SystemRequirements.vue'
 
 // 模型大小选项
 const modelSizes = ref([
   { id: 'small', label: '轻量版', active: true },
   { id: 'medium', label: '标准版', active: false },
-  { id: 'large', label: '增强版', active: false }
-]);
+  { id: 'large', label: '增强版', active: false },
+])
 
 // 当前选中的模型大小信息
 const currentModelInfo = ref({
@@ -20,14 +20,14 @@ const currentModelInfo = ref({
     specs: [
       { icon: '💻', name: 'CPU: i5 12代', compatible: true },
       { icon: '📊', name: '内存: 16GB', compatible: true },
-      { icon: '🎮', name: '显卡: GTX 1060', compatible: true }
-    ]
-  }
-});
+      { icon: '🎮', name: '显卡: GTX 1060', compatible: true },
+    ],
+  },
+})
 
 // 切换模型大小
 const switchModelSize = (size: string) => {
-  modelSizes.value.forEach(s => s.active = s.id === size);
+  modelSizes.value.forEach(s => s.active = s.id === size)
 
   if (size === 'small') {
     currentModelInfo.value = {
@@ -39,11 +39,12 @@ const switchModelSize = (size: string) => {
         specs: [
           { icon: '💻', name: 'CPU: i5 12代', compatible: true },
           { icon: '📊', name: '内存: 16GB', compatible: true },
-          { icon: '🎮', name: '显卡: GTX 1060', compatible: true }
-        ]
-      }
-    };
-  } else if (size === 'medium') {
+          { icon: '🎮', name: '显卡: GTX 1060', compatible: true },
+        ],
+      },
+    }
+  }
+  else if (size === 'medium') {
     currentModelInfo.value = {
       size: '7-13B 参数',
       description: '适合更复杂的任务，能处理多种语言和领域知识',
@@ -53,11 +54,12 @@ const switchModelSize = (size: string) => {
         specs: [
           { icon: '💻', name: 'CPU: i5 12代', compatible: true },
           { icon: '📊', name: '内存: 16GB', compatible: true },
-          { icon: '🎮', name: '显卡: GTX 1060', compatible: true }
-        ]
-      }
-    };
-  } else {
+          { icon: '🎮', name: '显卡: GTX 1060', compatible: true },
+        ],
+      },
+    }
+  }
+  else {
     currentModelInfo.value = {
       size: '30B+ 参数',
       description: '适合高级任务，提供最高质量输出，但需要强大硬件',
@@ -67,12 +69,12 @@ const switchModelSize = (size: string) => {
         specs: [
           { icon: '💻', name: 'CPU: i5 12代', compatible: true },
           { icon: '📊', name: '内存: 16GB', compatible: false },
-          { icon: '🎮', name: '显卡: GTX 1060', compatible: false }
-        ]
-      }
-    };
+          { icon: '🎮', name: '显卡: GTX 1060', compatible: false },
+        ],
+      },
+    }
   }
-};
+}
 </script>
 
 <template>
