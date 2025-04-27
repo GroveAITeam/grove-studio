@@ -36,7 +36,7 @@ const content = [
     isActive: true,
   },
   {
-    title: '对话模型',
+    title: '模型配置',
     url: '/LLM/index',
     icon: Bot,
   },

@@ -3,7 +3,7 @@
     "baseUrl": ".",
     "moduleResolution": "node",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
     },
     "typeRoots": ["node_modules/@types", "src/types"],
     "strict": true
